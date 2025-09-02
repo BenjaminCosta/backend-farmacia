@@ -4,6 +4,6 @@ import com.example.uade.tpo.Farmacia.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);}
+public interface RoleRepository extends JpaRepository<Role, Long> {
+    Optional<Role> findbyName(String name);
+    Optional<Role> findbyDescription(String description);}
