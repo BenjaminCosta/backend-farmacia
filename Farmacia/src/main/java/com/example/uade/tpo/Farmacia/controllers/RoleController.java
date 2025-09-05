@@ -18,13 +18,14 @@ public class RoleController {
 
     @PostMapping
     public Role createRole(@RequestBody Role role){
-        return RoleService.SaveRole(role);}
-    
+        return roleService.saveRole(role);}
+
     @GetMapping
     public List<Role> getAllRoles(){
         return roleService.getAllRoles();}
     
-    @GetMapping("/{name}}")
+    @GetMapping("/{name}")
     public Role getRoleByName(@PathVariable String name){
-        return roleService.getRoleByName(name);}
+        return roleService.getRoleByName(name).orElse(null);}
+
 }
