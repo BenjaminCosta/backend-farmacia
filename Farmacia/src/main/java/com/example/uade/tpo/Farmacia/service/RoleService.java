@@ -20,5 +20,14 @@ import org.springframework.http.HttpStatus;
 
 @Service
 public class RoleService {
+    private RoleRepository roleRepository;
+
+    public Role saveRole(Role role){
+        return roleRepository.save(role);}
     
+    public List<Role> getAllRoles(){
+        return roleRepository.findAll();}
+    
+    public optional<Role> getRoleByName(String name){
+        return roleRepository.findByName(name);}
 }
