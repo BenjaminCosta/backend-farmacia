@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.uade.tpo.Farmacia.controllers.dto;
 
 
 public class RoleDTO {

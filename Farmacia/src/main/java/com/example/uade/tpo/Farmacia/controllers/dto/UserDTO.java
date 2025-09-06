@@ -1,4 +1,4 @@
-package com.example.dto;
+package com.example.uade.tpo.Farmacia.controllers.dto;
 
 import java.util.Set;
 
