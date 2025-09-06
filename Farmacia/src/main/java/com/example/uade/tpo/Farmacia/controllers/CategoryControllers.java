@@ -15,12 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
-
-
-
-
-
 @RestController
 @RequestMapping("categories")
 public class CategoryControllers {
@@ -51,7 +45,5 @@ public class CategoryControllers {
     public void delete(@PathVariable Long id){
         categoryService.delete(id);
     }
-
-    
 
 }

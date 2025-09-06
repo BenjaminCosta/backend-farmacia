@@ -66,6 +66,4 @@ public class CartController {
         return service.checkout(currentEmail(auth));
     }
     
-    
-
 }
