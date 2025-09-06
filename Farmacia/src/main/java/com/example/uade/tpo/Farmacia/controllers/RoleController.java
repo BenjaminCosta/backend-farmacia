@@ -1,9 +1,8 @@
 package com.example.uade.tpo.Farmacia.controllers;
 
 import com.example.uade.tpo.Farmacia.entity.Role;
-import com.example.uade.tpo.Farmacia.entity.User;
 import com.example.uade.tpo.Farmacia.service.RoleService;
-import com.example.uade.tpo.Farmacia.service.UserService;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -1,33 +1,12 @@
 package com.example.uade.tpo.Farmacia.service;
 
-import com.example.uade.tpo.Farmacia.entity.User;
 import com.example.uade.tpo.Farmacia.entity.Role;
-import com.example.uade.tpo.Farmacia.repository.UserRepository;
-
-import exceptions.UserAlreadyExistsException;
-
-import com.example.uade.tpo.Farmacia.repository.RoleRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
-
-
-@Service
-public class RoleService {
-    private RoleRepository roleRepository;
-
-    public Role saveRole(Role role){
-        return roleRepository.save(role);}
-    
-    public List<Role> getAllRoles(){
-        return roleRepository.findAll();}
-    
-    public optional<Role> getRoleByName(String name){
-        return roleRepository.findByName(name);}
+public interface RoleService {
+    Role saveRole(Role role);
+    List<Role> getAllRoles();
+    Optional<Role> getRoleByName(String name);
 }
