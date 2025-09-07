@@ -6,8 +6,9 @@ import com.example.uade.tpo.Farmacia.entity.Cart;
 import com.example.uade.tpo.Farmacia.entity.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-
+@Repository
 public class CartRepository extends JpaRepository<Cart, Long> {
     Optional<Cart> findByUserAndStatus(User user, Cart.Status status);
 }

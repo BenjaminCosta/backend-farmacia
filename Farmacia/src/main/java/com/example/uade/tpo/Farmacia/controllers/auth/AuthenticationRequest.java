@@ -1,7 +1,5 @@
 package com.example.uade.tpo.Farmacia.controllers.auth;
 
-
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

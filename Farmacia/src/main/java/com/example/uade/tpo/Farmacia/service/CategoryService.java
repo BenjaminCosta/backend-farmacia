@@ -21,17 +21,17 @@ public class CategoryService {
 
     private final CategoryRepository repo;
 
-    public List<CategoryResponse> findAll() {
+    public List<CategoryResponseDTO> findAll() {
         return repo.findAll().stream().map(this::toResponse).toList();
     }
 
-    public CategoryResponse findById(Long id) {
+    public CategoryResponseDTO findById(Long id) {
         Category c = repo.findById(id).orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
         return toResponse(c);
     }
 
     @Transactional
-    public CategoryResponse create(CategoryRequest req) {
+    public CategoryResponseDTO create(CategoryRequest req) {
        
         if (repo.existsByName(req.getName().trim())) {
             throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
@@ -44,7 +44,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryResponse update(Long id, CategoryRequest req) {
+    public CategoryResponseDTO update(Long id, CategoryRequest req) {
         Category c = repo.findById(id).orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
         
         String newName = req.getName().trim();
@@ -62,7 +62,7 @@ public class CategoryService {
         repo.deleteById(id);
     }
 
-    private CategoryResponse toResponse(Category c) {
-        return new CategoryResponse(c.getId(), c.getName(), c.getDescription());
+    private CategoryResponseDTO toResponse(Category c) {
+        return new CategoryResponseDTO(c.getId(), c.getName(), c.getDescription());
     }
 }

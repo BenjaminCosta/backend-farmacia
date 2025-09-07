@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.uade.tpo.Farmacia.entity.Cart;
+import com.example.uade.tpo.Farmacia.service.CartAddItemRequest;
 import com.example.uade.tpo.Farmacia.service.CartService;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,7 +44,9 @@ public class CartController {
         @RequestParam Long prodcutId,
         @RequestParam Integer quantity,
         Authentication authentication
-    ){return service.addItem(currentEmail(auth), productId, quantity);}
+    ){Authentication auth;
+    CartAddItemRequest productId;
+    return service.addItem(currentEmail(auth), productId, quantity);}
     
 
     //PATCH
@@ -66,6 +69,4 @@ public class CartController {
         return service.checkout(currentEmail(auth));
     }
     
-    
-
 }
