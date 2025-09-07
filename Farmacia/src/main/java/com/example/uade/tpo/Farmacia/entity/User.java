@@ -24,7 +24,7 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    public User(String username, String password2, String email2, Role role2){}
+    public User(){}
 
     public User(String name, String password, String email) {
         this.name = name;
