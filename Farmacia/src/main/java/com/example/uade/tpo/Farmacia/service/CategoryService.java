@@ -1,35 +1,68 @@
 package com.example.uade.tpo.Farmacia.service;
 
-import java.util.List;
-import java.util.Locale.Category;
-
-import org.springframework.stereotype.Service;
-
+import com.example.uade.tpo.Farmacia.controllers.category.dto.CategoryRequest;
+import com.example.uade.tpo.Farmacia.controllers.category.dto.CategoryResponse;
+import com.example.uade.tpo.Farmacia.entity.Category;
+import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 import com.example.uade.tpo.Farmacia.repository.CategoryRepository;
 
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import exceptions.NotFoundException;
+
+@RequiredArgsConstructor
 @Service
 public class CategoryService {
-     
-    private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository){
-        this.categoryRepository = categoryRepository;
-    }
-    
-    public List<Category> findAll(){
-        return categoryRepository.findAll();
+    private final CategoryRepository repo;
+
+    public List<CategoryResponse> findAll() {
+        return repo.findAll().stream().map(this::toResponse).toList();
     }
 
-    public Category findById(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
+    public CategoryResponse findById(Long id) {
+        Category c = repo.findById(id).orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
+        return toResponse(c);
     }
 
-    public Category save(Category category) {
-        return categoryRepository.save(category);
+    @Transactional
+    public CategoryResponse create(CategoryRequest req) {
+       
+        if (repo.existsByName(req.getName().trim())) {
+            throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
+        }
+        Category c = Category.builder()
+                .name(req.getName().trim())
+                .description(req.getDescription())
+                .build();
+        return toResponse(repo.save(c));
     }
 
+    @Transactional
+    public CategoryResponse update(Long id, CategoryRequest req) {
+        Category c = repo.findById(id).orElseThrow(() -> new NotFoundException("Categoría no encontrada"));
+        
+        String newName = req.getName().trim();
+        if (!c.getName().equalsIgnoreCase(newName) && repo.existsByName(newName)) {
+            throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
+        }
+        c.setName(newName);
+        c.setDescription(req.getDescription());
+        return toResponse(repo.save(c));
+    }
+
+    @Transactional
     public void delete(Long id) {
-        categoryRepository.deleteById(id);
+        if (!repo.existsById(id)) throw new NotFoundException("Categoría no encontrada");
+        repo.deleteById(id);
+    }
+
+    private CategoryResponse toResponse(Category c) {
+        return new CategoryResponse(c.getId(), c.getName(), c.getDescription());
     }
 }

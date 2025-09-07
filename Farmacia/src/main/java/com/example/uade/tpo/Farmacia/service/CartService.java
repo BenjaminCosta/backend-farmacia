@@ -1,28 +1,20 @@
 package com.example.uade.tpo.Farmacia.service;
 
+import com.example.uade.tpo.Farmacia.controllers.cart.dto.CartAddItemRequest;
+import com.example.uade.tpo.Farmacia.controllers.cart.dto.CartResponse;
+import com.example.uade.tpo.Farmacia.controllers.cart.dto.CartUpdateItemRequest;
+import com.example.uade.tpo.Farmacia.entity.*;
+import com.example.uade.tpo.Farmacia.repository.*;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.math.BigDecimal;
 
-import javax.resource.spi.IllegalStateException;
-
-import org.springframework.stereotype.Service;
-
-import com.example.uade.tpo.Farmacia.entity.Cart;
-import com.example.uade.tpo.Farmacia.entity.CartItem;
-import com.example.uade.tpo.Farmacia.entity.OrderItem;
-import com.example.uade.tpo.Farmacia.entity.Product;
-import com.example.uade.tpo.Farmacia.entity.User;
-import com.example.uade.tpo.Farmacia.repository.CartItemRepository;
-import com.example.uade.tpo.Farmacia.repository.CartRepository;
-import com.example.uade.tpo.Farmacia.repository.OrderItemRepository;
-import com.example.uade.tpo.Farmacia.repository.OrderRepository;
-import com.example.uade.tpo.Farmacia.repository.ProductRepository;
-import com.example.uade.tpo.Farmacia.repository.UserRepository;
-import jakarta.transaction.Transactional;
-
-
+@RequiredArgsConstructor
 @Service
 public class CartService {
-    
 
     private final CartRepository carts;
     private final CartItemRepository items;
@@ -31,146 +23,176 @@ public class CartService {
     private final OrderRepository orders;
     private final OrderItemRepository orderItems;
 
-    public CartService(
-        CartRepository carts, CartItemRepository items, UserRepository users,
-      ProductRepository products, OrderRepository orders, OrderItemRepository orderItems
-    ) {
-        this.carts = carts; this.items = items; this.users = users;
-    this.products = products; this.orders = orders; this.orderItems = orderItems;
-    }
-
-    private Cart getOrCreateOpenCart(User user){
-        return carts.findByUserAndStatus(user, Cart.Status.OPEN)
-        .orElseGet(() ->{
-            Cart c = new Cart();
-            c.setUser(user);
-            c.setStatus(Cart.Status.OPEN);
-            return carts.save(c);
-        });
-    }
-
-    public Cart getCartByUserEmail(String email){
+    //api
+    public CartResponse getCart(String email) {
         User u = users.findByEmail(email).orElseThrow();
-        return getOrCreateOpenCart(u);
-  }
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseGet(() -> carts.save(newCart(u)));
+        return toResponse(c);
+    }
 
     @Transactional
-    public Cart addItem(String email, Long productId, Integer quantity){
-        if (quantity == null || quantity < 1) throw new IllegalArgumentException("Cantidad inválida");
+    public CartResponse addItem(String email, CartAddItemRequest req) {
+        if (req.getQuantity() == null || req.getQuantity() < 1)
+            throw new IllegalArgumentException("Cantidad inválida");
+
         User u = users.findByEmail(email).orElseThrow();
-        Product p = products.findById(productId).orElseThrow();
+        Product p = products.findById(req.getProductId()).orElseThrow();
 
-        if (p.getStock() <= 0) throw new java.lang.IllegalStateException("Producto sin stock");
-        if (quantity> p.getStock()) throw new java.lang.IllegalStateException("Cantidad supera stock disponible");
+        if (p.getStock() == null || p.getStock() <= 0)
+            throw new IllegalStateException("Producto sin stock");
+        if (req.getQuantity() > p.getStock())
+            throw new IllegalStateException("Cantidad supera stock disponible");
 
-        Cart c = getOrCreateOpenCart(u);
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseGet(() -> carts.save(newCart(u)));
 
-        //si existe item para el producto se suma la cantidad
         CartItem existing = c.getItems().stream()
-            .filter(ci -> ci.getProduct().getId().equals(p.getId()))
-            .findFirst().orElse(null);
+                .filter(ci -> ci.getProduct().getId().equals(p.getId()))
+                .findFirst().orElse(null);
 
-        if (existing!= null){
-         existing.setQuantity(existing.getQuantity() + quantity);
-         //snapshot con precio actual +desc actual
-         existing.setUnitPrice(p.getPrecio());
-         existing.setUnitDiscount(p.getDescuento()); // puede ser null
-         existing.recomputeLineTotal();
-         items.save(existing);
-         return carts.save(c);
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + req.getQuantity());
+            existing.setUnitPrice(p.getPrecio());
+            existing.setUnitDiscount(p.getDescuento());
+            existing.recomputeLineTotal();
+            items.save(existing);
+            return toResponse(carts.save(c));
         }
 
         CartItem ci = new CartItem();
         ci.setCart(c);
         ci.setProduct(p);
-        ci.setQuantity(quantity);
+        ci.setQuantity(req.getQuantity());
         ci.setUnitPrice(p.getPrecio());
-        ci.setUnitDiscount(p.getDescuento()); // absoluto
+        ci.setUnitDiscount(p.getDescuento());
         ci.recomputeLineTotal();
 
         c.getItems().add(ci);
-        return carts.save(c); 
+        carts.save(c); // cascade crea el item
+        return toResponse(c);
     }
 
-
     @Transactional
-    public Cart updateItemQuantity(String email, Long itemId, Integer quantity){
-     if (quantity == null || quantity < 1) throw new IllegalArgumentException("Cantidad inválida");
+    public CartResponse updateItem(String email, Long itemId, CartUpdateItemRequest req) {
+        if (req.getQuantity() == null || req.getQuantity() < 1)
+            throw new IllegalArgumentException("Cantidad inválida");
 
-     User u = users.findByEmail(email).orElseThrow();
-     Cart c = getOrCreateOpenCart(u);
-     CartItem ci = items.findById(itemId).orElseThrow();
-
-     if (!ci.getCart().getId().equals(c.getId()))
-      throw new IllegalStateException("El ítem no pertenece al carrito del usuario");
-
-    Product p = ci.getProduct();
-    if (quantity > p.getStock()) throw new IllegalStateException("Cantidad supera stock");
-    ci.setQuantity(quantity);
-    //mantenemos snapshot original (no se recalcula precio ni descuento salvo que quieras)
-    ci.recomputeLineTotal();
-    items.save(ci);
-    return carts.save(c);
-  }
-
-    
-    @Transactional
-    public void removeItem(String email, Long itemId){
         User u = users.findByEmail(email).orElseThrow();
-        Cart c = getOrCreateOpenCart(u);
-        CartItem ci = items.findById(itemId).orElseThrow();
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseThrow(() -> new IllegalStateException("No hay carrito abierto"));
 
-        if (!ci.getCart().getId().equals(c.getId())) throw new IllegalStateException("Item no pertenece al carrito del usuario");
+        CartItem ci = items.findById(itemId).orElseThrow();
+        if (!ci.getCart().getId().equals(c.getId()))
+            throw new IllegalStateException("El ítem no pertenece al carrito del usuario");
+
+        if (req.getQuantity() > ci.getProduct().getStock())
+            throw new IllegalStateException("Cantidad supera stock");
+
+        ci.setQuantity(req.getQuantity());
+        // mantenemos snapshots previos
+        ci.recomputeLineTotal();
+        items.save(ci);
+        return toResponse(carts.save(c));
+    }
+
+    @Transactional
+    public void removeItem(String email, Long itemId) {
+        User u = users.findByEmail(email).orElseThrow();
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseThrow(() -> new IllegalStateException("No hay carrito abierto"));
+
+        CartItem ci = items.findById(itemId).orElseThrow();
+        if (!ci.getCart().getId().equals(c.getId()))
+            throw new IllegalStateException("El ítem no pertenece al carrito del usuario");
+
         c.getItems().remove(ci);
         items.delete(ci);
         carts.save(c);
     }
 
     @Transactional
-    public Long checkout(String email ){
-         User u = users.findByEmail(email).orElseThrow();
-         Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
-         .orElseThrow(() -> new IllegalStateException("No hay carrito abierto"));
+    public Long checkout(String email) {
+        User u = users.findByEmail(email).orElseThrow();
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseThrow(() -> new IllegalStateException("No hay carrito abierto"));
 
-    if (c.getItems().isEmpty()) throw new IllegalStateException("Carrito vacío");
+        if (c.getItems().isEmpty())
+            throw new IllegalStateException("Carrito vacío");
 
-    // 1- Validar stock
-    for (CartItem it : c.getItems()) {
-       if (it.getQuantity() > it.getProduct().getStock())
-        throw new IllegalStateException("Sin stock para " + it.getProduct().getNombre());
+        // 1) validar stock
+        for (CartItem it : c.getItems()) {
+            if (it.getQuantity() > it.getProduct().getStock()) {
+                throw new IllegalStateException("Sin stock para " + it.getProduct().getNombre());
+            }
+        }
+
+        //2) descontar stock
+        for (CartItem it : c.getItems()) {
+            Product p = it.getProduct();
+            p.setStock(p.getStock() - it.getQuantity());
+            products.save(p);
+        }
+
+        //3) crear orden + items snapshot
+        Order order = new Order();
+        order.setUser(u);
+        order.setTotal(
+            c.getItems().stream()
+             .map(CartItem::getLineTotal)
+             .reduce(BigDecimal.ZERO, BigDecimal::add)
+        );
+        order = orders.save(order);
+
+        for (CartItem it : c.getItems()) {
+            OrderItem oi = new OrderItem();
+            oi.setOrder(order);
+            oi.setProduct(it.getProduct());
+            oi.setQuantity(it.getQuantity());
+            oi.setUnitPrice(it.getUnitPrice());
+            oi.setUnitDiscount(it.getUnitDiscount());
+            oi.setLineTotal(it.getLineTotal());
+            orderItems.save(oi);
+        }
+
+        //4 cerrar carrito
+        c.setStatus(Cart.Status.CHECKED_OUT);
+        carts.save(c);
+
+        return order.getId();
     }
 
-    //2- Descontar stock
-    for (CartItem it : c.getItems()) {
-      Product p = it.getProduct();
-      p.setStock(p.getStock() - it.getQuantity());
-      products.save(p);
+    //helpers
+
+    private Cart newCart(User u) {
+        Cart c = new Cart();
+        c.setUser(u);
+        c.setStatus(Cart.Status.OPEN);
+        return c;
     }
 
-    // 3) Crear orden + items (con snapshots)
-    Order order = new Order();
-    order.setUser(u);
-    order.setTotal(c.getItems().stream()
-        .map(CartItem::getLineTotal)
-        .reduce(BigDecimal.ZERO, BigDecimal::add));
-    order = orders.save(order);
+    private CartResponse toResponse(Cart c) {
+        var lines = c.getItems().stream().map(it -> {
+            var l = new CartResponse.CartLine();
+            l.setItemId(it.getId());
+            l.setProductId(it.getProduct().getId());
+            l.setName(it.getProduct().getNombre()); 
+            l.setQuantity(it.getQuantity());
+            l.setUnitPrice(it.getUnitPrice());
+            l.setUnitDiscount(it.getUnitDiscount());
+            l.setLineTotal(it.getLineTotal());
+            return l;
+        }).toList();
 
-    for (CartItem it : c.getItems()) {
-      OrderItem oi = new OrderItem();
-      oi.setOrder(order);
-      oi.setProduct(it.getProduct());
-      oi.setQuantity(it.getQuantity());
-      oi.setUnitPrice(it.getUnitPrice());
-      oi.setUnitDiscount(it.getUnitDiscount());
-      oi.setLineTotal(it.getLineTotal());
-      orderItems.save(oi);
+        var total = lines.stream()
+                .map(CartResponse.CartLine::getLineTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        var dto = new CartResponse();
+        dto.setId(c.getId());
+        dto.setStatus(c.getStatus().name());
+        dto.setItems(lines);
+        dto.setTotal(total);
+        return dto;
     }
-
-    // 4) Cerrar carrito
-    c.setStatus(Cart.Status.CHECKED_OUT);
-    carts.save(c);
-
-    return order.getId();
-
-    }    
 }
