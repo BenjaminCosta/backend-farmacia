@@ -5,13 +5,11 @@ import com.example.uade.tpo.Farmacia.entity.Role;
 import com.example.uade.tpo.Farmacia.repository.UserRepository;
 import com.example.uade.tpo.Farmacia.repository.RoleRepository;
 import com.example.uade.tpo.Farmacia.service.UserService;
-
 import exceptions.UserAlreadyExistsException;
+import exceptions.NotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
         Optional<Role> roleOpt = roleRepository.findByName(roleName);
         if(roleOpt.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Este rol no existe");
+            throw new NotFoundException("Este rol no existe");
         }
         Role role = roleOpt.get();
 
@@ -54,8 +52,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserById(Long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-}
-
-
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+    }
 }
