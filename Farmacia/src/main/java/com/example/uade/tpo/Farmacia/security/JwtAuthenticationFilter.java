@@ -1,5 +1,5 @@
 // Source code is decompiled from a .class file using FernFlower decompiler (from Intellij IDEA).
-package com.uade.tpo.demo.controllers.config;
+package com.example.uade.tpo.Farmacia.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

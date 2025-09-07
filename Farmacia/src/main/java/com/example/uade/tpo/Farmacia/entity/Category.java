@@ -50,4 +50,9 @@ public class Category {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    public static Object builder() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'builder'");
+    }
 }
