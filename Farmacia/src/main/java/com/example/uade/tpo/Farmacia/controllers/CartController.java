@@ -1,6 +1,8 @@
 package com.example.uade.tpo.Farmacia.controllers;
 
 
+import java.net.CacheRequest;
+
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.uade.tpo.Farmacia.controllers.auth.PreAuthorize;
 import com.example.uade.tpo.Farmacia.entity.Cart;
-import com.example.uade.tpo.Farmacia.service.CartAddItemRequest;
 import com.example.uade.tpo.Farmacia.service.CartService;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +30,7 @@ public class CartController {
     public CartController(CartService service){this.service = service;}
 
     private String currentEmail(Authentication auth){
-        return auth.getName();  //email
+        return auth.name();  //email
 
     }
 
@@ -44,9 +46,9 @@ public class CartController {
         @RequestParam Long prodcutId,
         @RequestParam Integer quantity,
         Authentication authentication
-    ){Authentication auth;
-    CartAddItemRequest productId;
-    return service.addItem(currentEmail(auth), productId, quantity);}
+    ){Authentication auth = null;
+    CacheRequest productId = null;
+    return service.additem(currentEmail(auth), productId, quantity);}
     
 
     //PATCH

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.net.CacheRequest;
 
 @RequiredArgsConstructor
 @Service
@@ -194,5 +195,15 @@ public class CartService {
         dto.setItems(lines);
         dto.setTotal(total);
         return dto;
+    }
+
+    public Cart getCartByUserEmail(String email) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCartByUserEmail'");
+    }
+
+    public Cart additem(String email, CacheRequest productId, Integer quantity) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'additem'");
     }
 }
