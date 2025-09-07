@@ -4,6 +4,8 @@ import com.example.uade.tpo.Farmacia.entity.Role;
 import com.example.uade.tpo.Farmacia.repository.RoleRepository;
 import com.example.uade.tpo.Farmacia.service.RoleService;
 
+import exceptions.UserAlreadyExistsException;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -19,9 +21,11 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role saveRole(Role role) {
+        if(roleRepository.findByName(role.getname()).isPresent()) {
+            throw new UserAlreadyExistsException("Este rol ya existe");}
         return roleRepository.save(role);
     }
-
+    
     @Override
     public List<Role> getAllRoles() {
         return roleRepository.findAll();
