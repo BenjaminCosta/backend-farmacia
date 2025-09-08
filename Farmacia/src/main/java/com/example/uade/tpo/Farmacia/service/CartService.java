@@ -1,8 +1,6 @@
 package com.example.uade.tpo.Farmacia.service;
 
-import com.example.uade.tpo.Farmacia.controllers.cart.dto.CartAddItemRequest;
-import com.example.uade.tpo.Farmacia.controllers.cart.dto.CartResponse;
-import com.example.uade.tpo.Farmacia.controllers.cart.dto.CartUpdateItemRequest;
+import com.example.uade.tpo.Farmacia.controllers.dto.CartResponse;
 import com.example.uade.tpo.Farmacia.entity.*;
 import com.example.uade.tpo.Farmacia.repository.*;
 

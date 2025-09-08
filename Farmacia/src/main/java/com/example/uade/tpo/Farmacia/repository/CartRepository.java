@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class CartRepository extends JpaRepository<Cart, Long> {
-    Optional<Cart> findByUserAndStatus(User user, Cart.Status status);
+    public Optional<Cart> findByUserAndStatus(User user, Cart.Status status);
 }
