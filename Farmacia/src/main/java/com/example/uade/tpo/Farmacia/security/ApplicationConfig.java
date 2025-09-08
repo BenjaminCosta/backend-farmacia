@@ -1,5 +1,4 @@
 package com.example.uade.tpo.Farmacia.security;
-
 import com.example.uade.tpo.Farmacia.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

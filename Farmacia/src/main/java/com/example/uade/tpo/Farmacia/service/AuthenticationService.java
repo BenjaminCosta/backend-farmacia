@@ -11,6 +11,7 @@ import com.example.uade.tpo.Farmacia.controllers.auth.RegisterRequest;
 import com.example.uade.tpo.Farmacia.entity.User;
 import com.example.uade.tpo.Farmacia.entity.Role;
 import com.example.uade.tpo.Farmacia.repository.UserRepository;
+import com.example.uade.tpo.Farmacia.repository.RoleRepository;
 import com.example.uade.tpo.Farmacia.security.JwtService;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthenticationService {
 
     private final UserRepository repository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -30,11 +32,15 @@ public class AuthenticationService {
             throw new IllegalArgumentException("El email ya está registrado");
         }
 
+        // Buscar el rol por nombre
+        Role role = roleRepository.findByName(request.getRole().name())
+                .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + request.getRole()));
+
         var user = new User();
         user.setName(request.getFirstname() + " " + request.getLastname());            
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
+        user.setRole(role);
 
         repository.save(user);
 

@@ -1,6 +1,6 @@
 package com.example.uade.tpo.Farmacia.controllers.auth;
 
-import com.example.uade.tpo.Farmacia.entity.Role;
+import com.example.uade.tpo.Farmacia.entity.RoleType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,5 +18,5 @@ public class RegisterRequest {
     private String lastname;
     private String email;
     private String password;
-    private Role role;
+    private RoleType role;
 }

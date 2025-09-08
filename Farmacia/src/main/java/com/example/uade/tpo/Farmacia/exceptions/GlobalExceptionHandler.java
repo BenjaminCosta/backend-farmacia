@@ -22,14 +22,14 @@ public class GlobalExceptionHandler {
         );
     }
 
-@ExceptionHandler(IllegalArgumentException.class)
-public ResponseEntity<Map<String,Object>> handleIllegalArg(IllegalArgumentException ex){
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                Map.of(
-                        "timestamp", Instant.now().toString(),
-                        "error", "Bad Request",
-                        "message", ex.getMessage()
-                )
-    );
-}
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String,Object>> handleIllegalArg(IllegalArgumentException ex){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                    Map.of(
+                            "timestamp", Instant.now().toString(),
+                            "error", "Bad Request",
+                            "message", ex.getMessage()
+                    )
+        );
+    }
 }
