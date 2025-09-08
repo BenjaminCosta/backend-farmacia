@@ -3,7 +3,7 @@ package com.example.uade.tpo.Farmacia.service;
 import com.example.uade.tpo.Farmacia.entity.Product;
 import com.example.uade.tpo.Farmacia.repository.ProductRepository;
 import com.example.uade.tpo.Farmacia.repository.CategoryRepository;
-import exceptions.NotFoundException;
+import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

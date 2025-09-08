@@ -5,8 +5,8 @@ import com.example.uade.tpo.Farmacia.entity.Role;
 import com.example.uade.tpo.Farmacia.repository.UserRepository;
 import com.example.uade.tpo.Farmacia.repository.RoleRepository;
 import com.example.uade.tpo.Farmacia.service.UserService;
-import exceptions.UserAlreadyExistsException;
-import exceptions.NotFoundException;
+import com.example.uade.tpo.Farmacia.exceptions.UserAlreadyExistsException;
+import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;

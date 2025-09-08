@@ -1,5 +1,6 @@
-package com.example.uade.tpo.Farmacia.controllers.auth;
+package com.example.uade.tpo.Farmacia.controllers.dto;
 
+import com.example.uade.tpo.Farmacia.entity.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class RegisterRequest {
+public class AdminCreateUserRequest {
     
     private String firstname;
     private String lastname;
     private String email;
     private String password;
-    // role eliminado por seguridad - siempre será USER por defecto
+    private RoleType role; // Solo para uso administrativo
 }

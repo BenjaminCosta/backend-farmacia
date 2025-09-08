@@ -4,7 +4,7 @@ import com.example.uade.tpo.Farmacia.entity.Role;
 import com.example.uade.tpo.Farmacia.repository.RoleRepository;
 import com.example.uade.tpo.Farmacia.service.RoleService;
 
-import exceptions.UserAlreadyExistsException;
+import com.example.uade.tpo.Farmacia.exceptions.UserAlreadyExistsException;
 
 import org.springframework.stereotype.Service;
 import java.util.List;

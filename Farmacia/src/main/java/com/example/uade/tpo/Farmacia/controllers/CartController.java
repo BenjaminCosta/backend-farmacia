@@ -1,74 +1,65 @@
 package com.example.uade.tpo.Farmacia.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
-import java.net.CacheRequest;
-
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.uade.tpo.Farmacia.controllers.auth.PreAuthorize;
-import com.example.uade.tpo.Farmacia.entity.Cart;
+import com.example.uade.tpo.Farmacia.controllers.dto.CartResponse;
+import com.example.uade.tpo.Farmacia.controllers.dto.UpdateQuantityRequest;
 import com.example.uade.tpo.Farmacia.service.CartService;
 
-import org.springframework.web.bind.annotation.PostMapping;
-
-
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/cart")
-@PreAuthorize("hasRole('BUYER')") 
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('USER') or hasRole('PHARMACIST') or hasRole('ADMIN')")
 public class CartController {
     
     private final CartService service;
 
-    public CartController(CartService service){this.service = service;}
-
-    private String currentEmail(Authentication auth){
-        return auth.name();  //email
-
+    private String currentEmail(Authentication auth) {
+        return auth.getName(); // email del JWT
     }
 
-    //GET 
+    // GET /cart
     @GetMapping
-    public Cart getCart(Authentication auth){
-        return service.getCartByUserEmail(currentEmail(auth));
-
+    public CartResponse getCart(Authentication auth) {
+        return service.getCart(currentEmail(auth));
     }
 
+    // POST /cart/items?productId={id}&quantity={n}
     @PostMapping("/items")
-    public Cart addItem(
-        @RequestParam Long prodcutId,
-        @RequestParam Integer quantity,
-        Authentication authentication
-    ){Authentication auth = null;
-    CacheRequest productId = null;
-    return service.additem(currentEmail(auth), productId, quantity);}
-    
-
-    //PATCH
-    @PatchMapping("/items/{itemId}")
-    public Cart updateItem(
-        @PathVariable Long itemId,
+    public CartResponse addItem(
+        @RequestParam Long productId,
         @RequestParam Integer quantity,
         Authentication auth
-    ){ return service.updateItemQuantity(currentEmail(auth), itemId, quantity); }
+    ) {
+        return service.addItemByParams(currentEmail(auth), productId, quantity);
+    }
 
-    //DELETE
+    // PATCH /cart/items/{itemId} - with JSON body
+    @PatchMapping("/items/{itemId}")
+    public CartResponse updateItem(
+        @PathVariable Long itemId,
+        @RequestBody UpdateQuantityRequest request,
+        Authentication auth
+    ) {
+        return service.updateItemQuantity(currentEmail(auth), itemId, request.getQuantity());
+    }
+
+    // DELETE /cart/items/{itemId}
     @DeleteMapping("/items/{itemId}")
-    public void deleteItem(@PathVariable Long itemId, Authentication auth){
+    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId, Authentication auth) {
         service.removeItem(currentEmail(auth), itemId);
+        return ResponseEntity.noContent().build();
     }
 
-    //POST 
+    // POST /cart/checkout
     @PostMapping("/checkout")
-    public Long checkout(Authentication auth){
-        return service.checkout(currentEmail(auth));
+    public ResponseEntity<Long> checkout(Authentication auth) {
+        Long orderId = service.checkout(currentEmail(auth));
+        return ResponseEntity.ok(orderId);
     }
-    
 }

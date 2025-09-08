@@ -9,6 +9,7 @@ import com.example.uade.tpo.Farmacia.controllers.auth.AuthenticationRequest;
 import com.example.uade.tpo.Farmacia.controllers.auth.AuthenticationResponse;
 import com.example.uade.tpo.Farmacia.controllers.auth.RegisterRequest;
 import com.example.uade.tpo.Farmacia.entity.User;
+import com.example.uade.tpo.Farmacia.entity.RoleType;
 import com.example.uade.tpo.Farmacia.entity.Role;
 import com.example.uade.tpo.Farmacia.repository.UserRepository;
 import com.example.uade.tpo.Farmacia.repository.RoleRepository;
@@ -32,9 +33,9 @@ public class AuthenticationService {
             throw new IllegalArgumentException("El email ya está registrado");
         }
 
-        // Buscar el rol por nombre
-        Role role = roleRepository.findByName(request.getRole().name())
-                .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado: " + request.getRole()));
+        // SEGURIDAD: Siempre asignar rol USER por defecto, ignorar cualquier intento de escalada
+        Role role = roleRepository.findByName(RoleType.USER.name())
+                .orElseThrow(() -> new IllegalArgumentException("Rol USER no encontrado en el sistema"));
 
         var user = new User();
         user.setName(request.getFirstname() + " " + request.getLastname());            

@@ -5,7 +5,7 @@ import com.example.uade.tpo.Farmacia.controllers.dto.CategoryResponse;
 import com.example.uade.tpo.Farmacia.entity.Category;
 import com.example.uade.tpo.Farmacia.repository.CategoryRepository;
 
-import exceptions.NotFoundException;
+import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

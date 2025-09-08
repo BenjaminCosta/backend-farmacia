@@ -5,13 +5,13 @@ import com.example.uade.tpo.Farmacia.controllers.dto.CartUpdateItemRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CartResponse;
 import com.example.uade.tpo.Farmacia.entity.*;
 import com.example.uade.tpo.Farmacia.repository.*;
+import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.net.CacheRequest;
 
 @RequiredArgsConstructor
 @Service
@@ -98,7 +98,58 @@ public class CartService {
     }
 
     @Transactional
-    public Cart updateItemQuantity(String email, Long itemId, Integer quantity) {
+    public CartResponse addItemByParams(String email, Long productId, Integer quantity) {
+        if (quantity == null || quantity < 1)
+            throw new IllegalArgumentException("Cantidad debe ser mayor a 0");
+
+        User u = users.findByEmail(email).orElseThrow(() -> 
+            new IllegalArgumentException("Usuario no encontrado"));
+        Product p = products.findById(productId).orElseThrow(() -> 
+            new IllegalArgumentException("Producto no encontrado"));
+
+        if (p.getStock() == null || p.getStock() <= 0)
+            throw new IllegalStateException("Producto sin stock");
+        if (quantity > p.getStock())
+            throw new IllegalStateException("Cantidad supera stock disponible: " + p.getStock());
+
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseGet(() -> carts.save(newCart(u)));
+
+        // Buscar item existente
+        CartItem existing = c.getItems().stream()
+                .filter(ci -> ci.getProduct().getId().equals(p.getId()))
+                .findFirst().orElse(null);
+
+        if (existing != null) {
+            // Sumar cantidades (idempotencia)
+            int newQuantity = existing.getQuantity() + quantity;
+            if (newQuantity > p.getStock()) {
+                throw new IllegalStateException("Total excede stock disponible: " + p.getStock());
+            }
+            existing.setQuantity(newQuantity);
+            existing.setUnitPrice(p.getPrecio());
+            existing.setUnitDiscount(p.getDescuento());
+            existing.recomputeLineTotal();
+            items.save(existing);
+            return toResponse(carts.save(c));
+        }
+
+        // Crear nuevo item
+        CartItem ci = new CartItem();
+        ci.setCart(c);
+        ci.setProduct(p);
+        ci.setQuantity(quantity);
+        ci.setUnitPrice(p.getPrecio());
+        ci.setUnitDiscount(p.getDescuento());
+        ci.recomputeLineTotal();
+
+        c.getItems().add(ci);
+        carts.save(c); // cascade crea el item
+        return toResponse(c);
+    }
+
+    @Transactional
+    public CartResponse updateItemQuantity(String email, Long itemId, Integer quantity) {
         if (quantity == null || quantity < 1)
             throw new IllegalArgumentException("Cantidad inválida");
 
@@ -116,7 +167,7 @@ public class CartService {
         ci.setQuantity(quantity);
         ci.recomputeLineTotal();
         items.save(ci);
-        return carts.save(c);
+        return toResponse(carts.save(c));
     }
 
     @Transactional
@@ -217,15 +268,5 @@ public class CartService {
         dto.setItems(lines);
         dto.setTotal(total);
         return dto;
-    }
-
-    public Cart getCartByUserEmail(String email) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getCartByUserEmail'");
-    }
-
-    public Cart additem(String email, CacheRequest productId, Integer quantity) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'additem'");
     }
 }

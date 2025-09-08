@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.example.uade.tpo.Farmacia.controllers.dto.CategoryRequest;
@@ -37,16 +38,19 @@ public class CategoryControllers {
     }
     
     @PostMapping
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public CategoryResponse create(@RequestBody CategoryRequest request) {
         return categoryService.create(request);
     }
     
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public CategoryResponse update(@PathVariable Long id, @RequestBody CategoryRequest request) {
         return categoryService.update(id, request);
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
     public void delete(@PathVariable Long id){
         categoryService.delete(id);
     }
