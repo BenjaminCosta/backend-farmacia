@@ -10,6 +10,7 @@ import exceptions.NotFoundException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,13 +23,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public User createUser(String username, String password, String email, String roleName) {
-
-        if(userRepository.findByUsername(username).isPresent()) {
-            throw new UserAlreadyExistsException("Este usuario ya existe");
-        }
 
         if(userRepository.findByEmail(email).isPresent()) {
             throw new UserAlreadyExistsException("Este email ya ha sido registrado");
@@ -40,7 +40,12 @@ public class UserServiceImpl implements UserService {
         }
         Role role = roleOpt.get();
 
-        User user = new User(username, password, email, role);
+        User user = new User();
+        user.setName(username);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setEmail(email);
+        user.setRole(role);
+        
         return userRepository.save(user);
     }
 

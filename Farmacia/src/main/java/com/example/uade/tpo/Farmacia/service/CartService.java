@@ -1,5 +1,7 @@
 package com.example.uade.tpo.Farmacia.service;
 
+import com.example.uade.tpo.Farmacia.controllers.dto.CartAddItemRequest;
+import com.example.uade.tpo.Farmacia.controllers.dto.CartUpdateItemRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CartResponse;
 import com.example.uade.tpo.Farmacia.entity.*;
 import com.example.uade.tpo.Farmacia.repository.*;
@@ -93,6 +95,28 @@ public class CartService {
         ci.recomputeLineTotal();
         items.save(ci);
         return toResponse(carts.save(c));
+    }
+
+    @Transactional
+    public Cart updateItemQuantity(String email, Long itemId, Integer quantity) {
+        if (quantity == null || quantity < 1)
+            throw new IllegalArgumentException("Cantidad inválida");
+
+        User u = users.findByEmail(email).orElseThrow();
+        Cart c = carts.findByUserAndStatus(u, Cart.Status.OPEN)
+                      .orElseThrow(() -> new IllegalStateException("No hay carrito abierto"));
+
+        CartItem ci = items.findById(itemId).orElseThrow();
+        if (!ci.getCart().getId().equals(c.getId()))
+            throw new IllegalStateException("El ítem no pertenece al carrito del usuario");
+
+        if (quantity > ci.getProduct().getStock())
+            throw new IllegalStateException("Cantidad supera stock");
+
+        ci.setQuantity(quantity);
+        ci.recomputeLineTotal();
+        items.save(ci);
+        return carts.save(c);
     }
 
     @Transactional

@@ -33,4 +33,28 @@ public class Product {
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;
 
+  // Métodos adicionales para compatibilidad
+  public BigDecimal getPrecio() {
+    return precio;
+  }
+  
+  public void setPrecio(BigDecimal precio) {
+    this.precio = precio;
+  }
+  
+  public BigDecimal getDescuento() {
+    return descuento;
+  }
+  
+  public void setDescuento(BigDecimal descuento) {
+    this.descuento = descuento;
+  }
+  
+  public Integer getStock() {
+    return stock;
+  }
+  
+  public void setStock(Integer stock) {
+    this.stock = stock;
+  }
 }

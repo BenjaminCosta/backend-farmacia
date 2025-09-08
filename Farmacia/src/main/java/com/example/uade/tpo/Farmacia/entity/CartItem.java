@@ -2,7 +2,7 @@ package com.example.uade.tpo.Farmacia.entity;
 
 import java.math.BigDecimal;
 
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Min;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -52,4 +52,28 @@ public class CartItem {
         this.lineTotal= unitPrice.subtract(d).max(BigDecimal.ZERO).multiply(new BigDecimal(quantity));
     }
 
+    // Métodos adicionales para compatibilidad
+    public BigDecimal getLineTotal() {
+        return lineTotal;
+    }
+
+    public void setLineTotal(BigDecimal lineTotal) {
+        this.lineTotal = lineTotal;
+    }
+
+    public BigDecimal getUnitPrice() {
+        return unitPrice;
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+    }
+
+    public BigDecimal getUnitDiscount() {
+        return unitDiscount;
+    }
+
+    public void setUnitDiscount(BigDecimal unitDiscount) {
+        this.unitDiscount = unitDiscount;
+    }
 }

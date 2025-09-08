@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mysql.cj.x.protobuf.MysqlxSession.AuthenticateOk;
+import com.example.uade.tpo.Farmacia.service.AuthenticationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthenticationController {
-    private final AuthenticateOk service;
+    private final AuthenticationService service;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(

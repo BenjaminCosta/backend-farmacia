@@ -33,10 +33,9 @@ public class CategoryService {
         if (repo.existsByName(req.getName().trim())) {
             throw new IllegalArgumentException("Ya existe una categoría con ese nombre");
         }
-        Category c = Category.builder()
-                .name(req.getName().trim())
-                .description(req.getDescription())
-                .build();
+        Category c = new Category();
+        c.setName(req.getName().trim());
+        c.setDescription(req.getDescription());
         return toResponse(repo.save(c));
     }
 

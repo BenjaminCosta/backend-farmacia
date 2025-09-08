@@ -21,8 +21,9 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Role saveRole(Role role) {
-        if(roleRepository.findByName(role.getname()).isPresent()) {
-            throw new UserAlreadyExistsException("Este rol ya existe");}
+        if(roleRepository.findByName(role.getName()).isPresent()) {
+            throw new UserAlreadyExistsException("Este rol ya existe");
+        }
         return roleRepository.save(role);
     }
     
