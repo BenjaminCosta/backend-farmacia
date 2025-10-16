@@ -8,6 +8,8 @@ import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
+import CookieBanner from "./components/CookieBanner";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
@@ -37,6 +39,7 @@ const App = () => (
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <div className="flex flex-col min-h-screen">
                 <Navbar />
                 <main className="flex-1">
@@ -95,6 +98,7 @@ const App = () => (
                   </Routes>
                 </main>
                 <Footer />
+                <CookieBanner />
               </div>
             </BrowserRouter>
           </TooltipProvider>
