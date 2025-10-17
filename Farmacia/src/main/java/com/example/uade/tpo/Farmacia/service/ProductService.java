@@ -1,5 +1,6 @@
 package com.example.uade.tpo.Farmacia.service;
 
+import com.example.uade.tpo.Farmacia.controllers.dto.CreateProductRequest;
 import com.example.uade.tpo.Farmacia.entity.Product;
 import com.example.uade.tpo.Farmacia.entity.Category;
 import com.example.uade.tpo.Farmacia.repository.ProductRepository;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -61,6 +63,57 @@ public class ProductService {
         });
   }
 
+  public Product createFromRequest(CreateProductRequest request) {
+    log.info("📦 Creating new product from request: {}", request.getNombre());
+    
+    try {
+      // Validaciones
+      if (request.getNombre() == null || request.getNombre().isBlank()) {
+        throw new IllegalArgumentException("El nombre del producto es obligatorio");
+      }
+      
+      if (request.getPrecio() == null || request.getPrecio() <= 0) {
+        throw new IllegalArgumentException("El precio debe ser mayor a 0");
+      }
+      
+      if (request.getStock() == null || request.getStock() < 0) {
+        throw new IllegalArgumentException("El stock no puede ser negativo");
+      }
+      
+      if (request.getCategory() == null || request.getCategory().getId() == null) {
+        throw new IllegalArgumentException("La categoría es obligatoria");
+      }
+      
+      // Validar que la categoría exista
+      Category category = categories.findById(request.getCategory().getId())
+          .orElseThrow(() -> {
+            log.warn("❌ Category not found with ID: {}", request.getCategory().getId());
+            return new NotFoundException("Categoría no encontrada con ID: " + request.getCategory().getId());
+          });
+      
+      // Crear producto
+      Product product = new Product();
+      product.setNombre(request.getNombre());
+      product.setDescripcion(request.getDescripcion());
+      product.setPrecio(BigDecimal.valueOf(request.getPrecio()));
+      product.setStock(request.getStock());
+      product.setDescuento(request.getDescuento() != null ? BigDecimal.valueOf(request.getDescuento()) : BigDecimal.ZERO);
+      product.setCategory(category);
+      
+      Product saved = repo.save(product);
+      log.info("✅ Product created successfully with ID: {} - Category: {}", 
+               saved.getId(), category.getName());
+      return saved;
+      
+    } catch (IllegalArgumentException | NotFoundException ex) {
+      log.error("❌ Validation error creating product: {}", ex.getMessage());
+      throw ex;
+    } catch (Exception ex) {
+      log.error("❌ Unexpected error creating product: {}", ex.getMessage(), ex);
+      throw new RuntimeException("Error al crear el producto: " + ex.getMessage(), ex);
+    }
+  }
+  
   public Product create(Product p) {
     log.info("Creating new product: {}", p.getNombre());
     

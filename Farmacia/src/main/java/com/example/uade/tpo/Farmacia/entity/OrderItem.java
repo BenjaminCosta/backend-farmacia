@@ -1,5 +1,6 @@
 package com.example.uade.tpo.Farmacia.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ public class OrderItem {
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "order_id", nullable = false)
+  @JsonBackReference
   private Order order;
 
   @ManyToOne(optional = false)

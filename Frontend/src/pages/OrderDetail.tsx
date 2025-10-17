@@ -40,40 +40,53 @@ const OrderDetail = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchOrder();
+    if (id) {
+      fetchOrder();
+    } else {
+      setLoading(false);
+      setOrder(null);
+    }
   }, [id]);
 
   const fetchOrder = async () => {
+    if (!id) return;
+    
     try {
       const response = await apiClient.get(`/orders/${id}`);
-      setOrder(response.data);
-    } catch (error) {
+      const orderData = response.data;
+      
+      // Mapear la respuesta del backend al formato esperado
+      const mappedOrder: Order = {
+        id: orderData.id,
+        createdAt: orderData.createdAt,
+        status: orderData.status,
+        total: orderData.total,
+        items: orderData.items?.map((item: any) => ({
+          id: item.productId,
+          productId: item.productId,
+          productName: item.productName,
+          quantity: item.quantity,
+          price: item.unitPrice,
+        })) || [],
+        shippingAddress: orderData.delivery ? {
+          fullName: orderData.delivery.fullName,
+          address: orderData.delivery.street,
+          city: orderData.delivery.city,
+          zipCode: orderData.delivery.zip,
+          phone: orderData.delivery.phone,
+        } : undefined,
+        deliveryMethod: orderData.delivery?.method || 'delivery',
+        paymentMethod: orderData.paymentMethod || 'cash',
+      };
+      
+      setOrder(mappedOrder);
+    } catch (error: any) {
       console.error('Error fetching order:', error);
-      // Mock data for development
-      setOrder({
-        id: id || '1',
-        createdAt: new Date().toISOString(),
-        status: 'PENDING',
-        total: 450000,
-        items: [
-          {
-            id: '1',
-            productId: '1',
-            productName: 'Ibuprofeno 400mg',
-            quantity: 2,
-            price: 250000,
-          },
-        ],
-        shippingAddress: {
-          fullName: 'Juan Pérez',
-          address: 'Av. Corrientes 1234',
-          city: 'CABA',
-          zipCode: '1043',
-          phone: '11-1234-5678',
-        },
-        deliveryMethod: 'delivery',
-        paymentMethod: 'cash',
-      });
+      
+      // Manejar 404 - orden no encontrada o no pertenece al usuario
+      if (error.response?.status === 404) {
+        setOrder(null);
+      }
     } finally {
       setLoading(false);
     }

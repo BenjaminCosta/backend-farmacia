@@ -27,20 +27,22 @@ const Orders = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await apiClient.get('/orders/mine');
-      setOrders(response.data);
+      const response = await apiClient.get('/orders');
+      const ordersData = response.data || [];
+      
+      // Mapear la respuesta del backend al formato esperado por el frontend
+      const mappedOrders = ordersData.map((order: any) => ({
+        id: order.id,
+        createdAt: order.createdAt,
+        status: order.status,
+        total: order.total,
+        itemCount: order.items?.length || 0,
+      }));
+      
+      setOrders(mappedOrders);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      // Mock data for development
-      setOrders([
-        {
-          id: '1',
-          createdAt: new Date().toISOString(),
-          status: 'PENDING',
-          total: 450000,
-          itemCount: 3,
-        },
-      ]);
+      setOrders([]);
     } finally {
       setLoading(false);
     }

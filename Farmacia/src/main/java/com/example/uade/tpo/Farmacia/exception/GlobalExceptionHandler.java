@@ -1,6 +1,7 @@
 package com.example.uade.tpo.Farmacia.exception;
 
 import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -86,6 +87,30 @@ public class GlobalExceptionHandler {
         log.warn("Business logic error: {}", ex.getMessage());
         
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /**
+     * Maneja violaciones de integridad de datos (duplicados, FK, etc.)
+     * Retorna 409 Conflict
+     */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", HttpStatus.CONFLICT.value());
+        
+        String message = "Conflicto de integridad de datos";
+        if (ex.getMessage() != null) {
+            if (ex.getMessage().contains("Duplicate entry")) {
+                message = "Ya existe un registro con esos datos";
+            } else if (ex.getMessage().contains("foreign key constraint")) {
+                message = "No se puede eliminar porque está siendo utilizado";
+            }
+        }
+        response.put("message", message);
+        
+        log.warn("Data integrity violation: {}", ex.getMessage());
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
     /**

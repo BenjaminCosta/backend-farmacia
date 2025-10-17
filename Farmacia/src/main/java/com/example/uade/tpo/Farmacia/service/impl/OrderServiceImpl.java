@@ -1,47 +1,201 @@
 package com.example.uade.tpo.Farmacia.service.impl;
 
+import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderRequest;
+import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderResponse;
+import com.example.uade.tpo.Farmacia.controllers.dto.DeliveryDTO;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderDTO;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderItemDTO;
 import com.example.uade.tpo.Farmacia.entity.Order;
 import com.example.uade.tpo.Farmacia.entity.OrderItem;
+import com.example.uade.tpo.Farmacia.entity.Product;
 import com.example.uade.tpo.Farmacia.entity.User;
 import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
+import com.example.uade.tpo.Farmacia.repository.OrderItemRepository;
 import com.example.uade.tpo.Farmacia.repository.OrderRepository;
+import com.example.uade.tpo.Farmacia.repository.ProductRepository;
 import com.example.uade.tpo.Farmacia.repository.UserRepository;
 import com.example.uade.tpo.Farmacia.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
   private final OrderRepository orders;
   private final UserRepository users;
+  private final ProductRepository products;
+  private final OrderItemRepository orderItems;
+
+  @Override
+  @Transactional
+  public CreateOrderResponse createOrder(String email, CreateOrderRequest request) {
+    log.info("📦 Iniciando creación de orden para: {}", email);
+    
+    // 1. Validar usuario
+    User user = users.findByEmail(email)
+        .orElseThrow(() -> {
+          log.error("❌ Usuario no encontrado: {}", email);
+          return new NotFoundException("Usuario no encontrado");
+        });
+    
+    // 2. Validar items no vacíos
+    if (request.getItems() == null || request.getItems().isEmpty()) {
+      log.error("❌ Intento de crear orden sin items - Usuario: {}", email);
+      throw new IllegalArgumentException("La orden debe contener al menos un producto");
+    }
+    
+    // 3. Validar y calcular total
+    BigDecimal total = BigDecimal.ZERO;
+    
+    for (CreateOrderRequest.OrderItemRequest item : request.getItems()) {
+      if (item.getProductId() == null) {
+        throw new IllegalArgumentException("El ID del producto no puede ser nulo");
+      }
+      if (item.getQuantity() == null || item.getQuantity() < 1) {
+        throw new IllegalArgumentException("La cantidad debe ser al menos 1");
+      }
+      
+      // Validar que el producto existe
+      Product product = products.findById(item.getProductId())
+          .orElseThrow(() -> {
+            log.error("❌ Producto no encontrado: {}", item.getProductId());
+            return new NotFoundException("Producto no encontrado: " + item.getProductId());
+          });
+      
+      // Validar stock
+      if (product.getStock() == null || product.getStock() < item.getQuantity()) {
+        log.error("❌ Stock insuficiente - Producto: {}, Stock: {}, Solicitado: {}", 
+                  product.getId(), product.getStock(), item.getQuantity());
+        throw new IllegalStateException(
+            "Stock insuficiente para el producto: " + product.getNombre() + 
+            " (disponible: " + product.getStock() + ", solicitado: " + item.getQuantity() + ")"
+        );
+      }
+      
+      // Calcular subtotal
+      BigDecimal unitPrice = product.getPrecio() != null ? product.getPrecio() : BigDecimal.ZERO;
+      BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
+      total = total.add(lineTotal);
+    }
+    
+    // 4. Crear la orden con datos de delivery
+    Order order = new Order();
+    order.setUser(user);
+    order.setTotal(total);
+    order.setStatus(Order.Status.PENDING);
+    
+    // Guardar información de delivery
+    order.setFullName(request.getFullName());
+    order.setDeliveryEmail(request.getEmail());
+    order.setDeliveryPhone(request.getPhone());
+    order.setDeliveryMethod(request.getDeliveryMethod());
+    order.setPaymentMethod(request.getPaymentMethod());
+    
+    // Guardar dirección si existe
+    if (request.getAddress() != null) {
+      order.setDeliveryStreet(request.getAddress().getStreet());
+      order.setDeliveryCity(request.getAddress().getCity());
+      order.setDeliveryZip(request.getAddress().getZip());
+    }
+    
+    order = orders.save(order);
+    
+    log.info("✅ Orden creada con ID: {} para usuario: {}", order.getId(), email);
+    
+    // 5. Crear los items y descontar stock
+    for (CreateOrderRequest.OrderItemRequest item : request.getItems()) {
+      Product product = products.findById(item.getProductId()).orElseThrow();
+      
+      // Descontar stock
+      product.setStock(product.getStock() - item.getQuantity());
+      products.save(product);
+      
+      // Crear OrderItem
+      OrderItem orderItem = new OrderItem();
+      orderItem.setOrder(order);
+      orderItem.setProduct(product);
+      orderItem.setQuantity(item.getQuantity());
+      orderItem.setUnitPrice(product.getPrecio() != null ? product.getPrecio() : BigDecimal.ZERO);
+      orderItem.setUnitDiscount(product.getDescuento() != null ? product.getDescuento() : BigDecimal.ZERO);
+      
+      BigDecimal lineTotal = orderItem.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+      orderItem.setLineTotal(lineTotal);
+      
+      orderItems.save(orderItem);
+      
+      log.debug("📦 Item agregado - Producto: {}, Cantidad: {}, Precio unitario: {}", 
+                product.getNombre(), item.getQuantity(), orderItem.getUnitPrice());
+    }
+    
+    log.info("✅ Orden {} completada exitosamente - Total: {}, Items: {}", 
+             order.getId(), total, request.getItems().size());
+    
+    // 6. Retornar respuesta
+    return CreateOrderResponse.builder()
+        .orderId(order.getId())
+        .total(total)
+        .status(order.getStatus().name())
+        .build();
+  }
 
   @Override
   public List<OrderDTO> myOrdersDTO(String email) {
-    return orders.findByUserEmail(email)
-        .stream()
+    User user = users.findByEmail(email)
+        .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+    
+    List<Order> userOrders = orders.findAllByUserIdWithItems(user.getId());
+    log.info("📋 Consultando órdenes para usuario: {} - Encontradas: {}", email, userOrders.size());
+    
+    return userOrders.stream()
         .map(this::toDTO)
         .collect(Collectors.toList());
   }
 
   @Override
   public List<OrderDTO> byUserIdDTO(Long userId) {
-    return orders.findByUserId(userId)
-        .stream()
+    List<Order> userOrders = orders.findAllByUserIdWithItems(userId);
+    log.info("📋 Consultando órdenes para userId: {} - Encontradas: {}", userId, userOrders.size());
+    
+    return userOrders.stream()
+        .map(this::toDTO)
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public List<OrderDTO> getAllOrdersDTO() {
+    log.info("🔐 Consultando TODAS las órdenes del sistema (Admin/Farmacéutico)");
+    
+    List<Order> allOrders = orders.findAll();
+    log.info("✅ Total de órdenes en el sistema: {}", allOrders.size());
+    
+    return allOrders.stream()
         .map(this::toDTO)
         .collect(Collectors.toList());
   }
 
   @Override
   public OrderDTO getUserOrderDTO(Long id, String email) {
-    return toDTO(getUserOrder(id, email));
+    User user = users.findByEmail(email)
+        .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+    
+    Order order = orders.findByIdAndUserIdWithItems(id, user.getId())
+        .orElseThrow(() -> {
+          log.warn("❌ Orden {} no encontrada o no pertenece al usuario {}", id, email);
+          return new NotFoundException("Orden no encontrada");
+        });
+    
+    log.info("📦 Consultando orden {} para usuario: {}", id, email);
+    return toDTO(order);
   }
 
   @Override
@@ -54,46 +208,53 @@ public class OrderServiceImpl implements OrderService {
 
   // ================= Helpers =================
 
-  private Order getUserOrder(Long id, String email) {
-    User user = users.findByEmail(email)
-        .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
-    Order order = orders.findById(id)
-        .orElseThrow(() -> new NotFoundException("Orden no encontrada"));
-
-    // Null-safe comparison de IDs
-    Long orderUserId = (order.getUser() != null) ? order.getUser().getId() : null;
-    Long requestUserId = user.getId();
-    if (orderUserId == null || requestUserId == null || !orderUserId.equals(requestUserId)) {
-      throw new IllegalStateException("No tiene permisos para ver esta orden");
-    }
-    return order;
-  }
-
   private OrderDTO toDTO(Order order) {
-    OrderDTO dto = new OrderDTO();
-    dto.setId(order.getId());
-    dto.setUserEmail(order.getUser().getEmail());
-    dto.setUserName(order.getUser().getName());
-    dto.setStatus(order.getStatus()); // enum Order.Status
-    dto.setTotal(order.getTotal());
-    dto.setCreatedAt(order.getCreatedAt());
-
-    List<OrderItemDTO> items = order.getItems()
+    // Mapear items
+    List<OrderItemDTO> itemDTOs = order.getItems()
         .stream()
         .map(this::toItemDTO)
         .collect(Collectors.toList());
-    dto.setItems(items);
-
-    return dto;
+    
+    // Calcular total desde items (para asegurar consistencia)
+    double total = itemDTOs.stream()
+        .mapToDouble(OrderItemDTO::lineTotal)
+        .sum();
+    
+    // Formatear fecha
+    DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;
+    String createdAt = order.getCreatedAt() != null ? 
+        formatter.format(order.getCreatedAt()) : null;
+    
+    // Mapear todos los campos planos de entrega y pago
+    return new OrderDTO(
+        order.getId(),
+        order.getStatus() != null ? order.getStatus().name() : "PENDING",
+        total,
+        itemDTOs,
+        order.getFullName() != null ? order.getFullName() : "",
+        order.getDeliveryStreet() != null ? order.getDeliveryStreet() : "",
+        order.getDeliveryCity() != null ? order.getDeliveryCity() : "",
+        order.getDeliveryZip() != null ? order.getDeliveryZip() : "",
+        order.getDeliveryEmail() != null ? order.getDeliveryEmail() : "",
+        order.getDeliveryPhone() != null ? order.getDeliveryPhone() : "",
+        order.getDeliveryMethod() != null ? order.getDeliveryMethod() : "",
+        order.getPaymentMethod() != null ? order.getPaymentMethod() : "",
+        createdAt
+    );
   }
 
-  private OrderItemDTO toItemDTO(OrderItem it) {
-    OrderItemDTO dto = new OrderItemDTO();
-    dto.setId(it.getId());
-    dto.setProductName(it.getProduct().getNombre()); // 'nombre' en Product
-    dto.setQuantity(it.getQuantity());
-    dto.setUnitPrice(it.getUnitPrice());
-    dto.setLineTotal(it.getLineTotal());
-    return dto;
+  private OrderItemDTO toItemDTO(OrderItem item) {
+    double unitPrice = item.getUnitPrice() != null ? 
+        item.getUnitPrice().doubleValue() : 0.0;
+    int quantity = item.getQuantity() != null ? item.getQuantity() : 0;
+    double lineTotal = unitPrice * quantity;
+    
+    return new OrderItemDTO(
+        item.getProduct().getId(),
+        item.getProduct().getNombre(),
+        unitPrice,
+        quantity,
+        lineTotal
+    );
   }
 }

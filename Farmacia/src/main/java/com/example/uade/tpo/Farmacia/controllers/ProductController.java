@@ -1,5 +1,7 @@
 package com.example.uade.tpo.Farmacia.controllers;
 
+import com.example.uade.tpo.Farmacia.controllers.dto.CreateProductRequest;
+import com.example.uade.tpo.Farmacia.controllers.dto.ProductDTO;
 import com.example.uade.tpo.Farmacia.entity.Product;
 import com.example.uade.tpo.Farmacia.service.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/products")
@@ -19,14 +22,20 @@ public class ProductController {
   private final ProductService service;
 
   @GetMapping
-  public ResponseEntity<List<Product>> list(@RequestParam(required = false) Long categoryId,
-                                             @RequestParam(required = false) String q,
-                                             @RequestParam(required = false) Boolean inStock) {
+  public ResponseEntity<List<ProductDTO>> list(@RequestParam(required = false) Long categoryId,
+                                                @RequestParam(required = false) String q,
+                                                @RequestParam(required = false) Boolean inStock) {
     try {
       log.info("GET /products - categoryId: {}, q: '{}', inStock: {}", categoryId, q, inStock);
       List<Product> products = service.list(categoryId, q, inStock);
-      log.info("Found {} products", products.size());
-      return ResponseEntity.ok(products);
+      
+      // Mapear a DTOs
+      List<ProductDTO> productDTOs = products.stream()
+          .map(this::toProductDTO)
+          .collect(Collectors.toList());
+      
+      log.info("Found {} products", productDTOs.size());
+      return ResponseEntity.ok(productDTOs);
     } catch (Exception ex) {
       log.error("Error listing products: {}", ex.getMessage(), ex);
       throw ex;
@@ -47,14 +56,20 @@ public class ProductController {
 
   @PostMapping
   @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
-  public ResponseEntity<Product> create(@RequestBody Product p) {
+  public ResponseEntity<ProductDTO> create(@RequestBody CreateProductRequest request) {
     try {
-      log.info("POST /products - Creating product: {}", p.getNombre());
-      Product saved = service.create(p);
-      log.info("Product created with ID: {}", saved.getId());
-      return ResponseEntity.created(URI.create("/products/" + saved.getId())).body(saved);
+      log.info("POST /products - Creating product: {}", request.getNombre());
+      log.debug("Request details - precio: {}, stock: {}, categoryId: {}", 
+                request.getPrecio(), request.getStock(), 
+                request.getCategory() != null ? request.getCategory().getId() : null);
+      
+      Product saved = service.createFromRequest(request);
+      ProductDTO dto = toProductDTO(saved);
+      
+      log.info("✅ Product created with ID: {}", saved.getId());
+      return ResponseEntity.created(URI.create("/products/" + saved.getId())).body(dto);
     } catch (Exception ex) {
-      log.error("Error creating product: {}", ex.getMessage());
+      log.error("❌ Error creating product: {}", ex.getMessage());
       throw ex;
     }
   }
@@ -83,5 +98,20 @@ public class ProductController {
       log.error("Error deleting product {}: {}", id, ex.getMessage());
       throw ex;
     }
+  }
+  
+  // ================= Helper Methods =================
+  
+  private ProductDTO toProductDTO(Product product) {
+    return new ProductDTO(
+        product.getId(),
+        product.getNombre(), // name
+        product.getDescripcion(), // description
+        product.getPrecio() != null ? product.getPrecio().doubleValue() : 0.0, // price
+        product.getStock(), // stock
+        product.getDescuento() != null ? product.getDescuento().doubleValue() : 0.0, // discount
+        product.getCategory() != null ? product.getCategory().getId() : null, // categoryId
+        product.getCategory() != null ? product.getCategory().getName() : null // categoryName
+    );
   }
 }

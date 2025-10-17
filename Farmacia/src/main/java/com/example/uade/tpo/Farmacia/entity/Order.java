@@ -1,5 +1,6 @@
 package com.example.uade.tpo.Farmacia.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -31,6 +32,32 @@ public class Order {
   @Column(nullable = false)
   private Instant createdAt = Instant.now();
 
+  // Delivery information
+  @Column(name = "full_name")
+  private String fullName;
+  
+  @Column(name = "delivery_email")
+  private String deliveryEmail;
+  
+  @Column(name = "delivery_phone")
+  private String deliveryPhone;
+  
+  @Column(name = "delivery_street")
+  private String deliveryStreet;
+  
+  @Column(name = "delivery_city")
+  private String deliveryCity;
+  
+  @Column(name = "delivery_zip")
+  private String deliveryZip;
+  
+  @Column(name = "delivery_method")
+  private String deliveryMethod;
+  
+  @Column(name = "payment_method")
+  private String paymentMethod;
+
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonManagedReference
   private List<OrderItem> items = new ArrayList<>();
 }

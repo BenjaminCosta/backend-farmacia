@@ -60,7 +60,8 @@ public class CategoryService {
                 throw new IllegalArgumentException("El nombre de la categoría es obligatorio");
             }
             
-            if (repo.existsByName(trimmedName)) {
+            // Usar existsByNameIgnoreCase para validar duplicados case-insensitive
+            if (repo.existsByNameIgnoreCase(trimmedName)) {
                 log.warn("Category already exists with name: {}", trimmedName);
                 throw new IllegalArgumentException("Ya existe una categoría con el nombre: " + trimmedName);
             }
@@ -100,7 +101,8 @@ public class CategoryService {
                 throw new IllegalArgumentException("El nombre de la categoría es obligatorio");
             }
             
-            if (!c.getName().equalsIgnoreCase(newName) && repo.existsByName(newName)) {
+            // Usar existsByNameIgnoreCaseAndIdNot para validar duplicados excluyendo el ID actual
+            if (repo.existsByNameIgnoreCaseAndIdNot(newName, id)) {
                 log.warn("Category already exists with name: {}", newName);
                 throw new IllegalArgumentException("Ya existe una categoría con el nombre: " + newName);
             }
