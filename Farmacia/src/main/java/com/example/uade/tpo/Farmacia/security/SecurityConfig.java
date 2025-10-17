@@ -48,6 +48,18 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                     
+                    // Rutas de ADMIN: solo acceso con rol ADMIN
+                    .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    
+                    // Rutas de órdenes y gestión: ADMIN tiene acceso total
+                    .requestMatchers("/api/v1/orders/all").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.DELETE, "/api/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    
                     // Cart y Orders requieren autenticación (manejado por @PreAuthorize en controllers)
                     .requestMatchers("/api/v1/cart/**").authenticated()
                     .requestMatchers("/api/v1/orders/**").authenticated()

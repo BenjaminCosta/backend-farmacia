@@ -29,6 +29,9 @@ public class DataInitializer {
         
         // Crear usuario PHARMACIST de prueba
         createPharmacistUserIfNotExists();
+        
+        // Crear usuario ADMIN de prueba
+        createAdminUserIfNotExists();
     }
 
     private void createRoleIfNotExists(String name, String description) {
@@ -72,6 +75,44 @@ public class DataInitializer {
             
             userRepository.save(user);
             System.out.println("✅ Usuario PHARMACIST actualizado:");
+            System.out.println("   Email: " + email);
+            System.out.println("   Contraseña: " + password);
+        }
+    }
+    
+    private void createAdminUserIfNotExists() {
+        String email = "admin@farmacia.com";
+        String password = "Admin123!";
+        
+        var existingUser = userRepository.findByEmail(email);
+        
+        if (existingUser.isEmpty()) {
+            // Crear nuevo usuario ADMIN
+            Role adminRole = roleRepository.findByName("ADMIN")
+                    .orElseThrow(() -> new RuntimeException("Rol ADMIN no encontrado"));
+            
+            User admin = new User();
+            admin.setEmail(email);
+            admin.setName("Administrador Sistema");
+            admin.setPassword(passwordEncoder.encode(password));
+            admin.setRole(adminRole);
+            
+            userRepository.save(admin);
+            System.out.println("✅ Usuario ADMIN de prueba creado:");
+            System.out.println("   Email: " + email);
+            System.out.println("   Contraseña: " + password);
+        } else {
+            // Actualizar contraseña del usuario existente
+            User user = existingUser.get();
+            user.setPassword(passwordEncoder.encode(password));
+            
+            // Asegurar que tenga el rol ADMIN
+            Role adminRole = roleRepository.findByName("ADMIN")
+                    .orElseThrow(() -> new RuntimeException("Rol ADMIN no encontrado"));
+            user.setRole(adminRole);
+            
+            userRepository.save(user);
+            System.out.println("✅ Usuario ADMIN actualizado:");
             System.out.println("   Email: " + email);
             System.out.println("   Contraseña: " + password);
         }

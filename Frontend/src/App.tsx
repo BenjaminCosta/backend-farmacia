@@ -20,6 +20,7 @@ import Login from "./pages/Login";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminPanel from "./pages/AdminPanel";
 import PharmacistDashboard from "./pages/PharmacistDashboard";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -91,7 +92,7 @@ const App = () => (
                       path="/admin"
                       element={
                         <ProtectedRoute requireAdmin>
-                          <AdminDashboard />
+                          <AdminPanel />
                         </ProtectedRoute>
                       }
                     />
