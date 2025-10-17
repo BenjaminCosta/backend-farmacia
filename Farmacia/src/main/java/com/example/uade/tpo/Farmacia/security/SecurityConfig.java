@@ -11,6 +11,12 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration(proxyBeanMethods = false)
 @EnableWebSecurity
@@ -25,56 +31,67 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(req -> 
                 req
-                    // Público: registro, login, errors, actuator
-                    .requestMatchers("/api/v1/auth/**")
-                    .permitAll()
-                    .requestMatchers("/auth/**")
-                    .permitAll()
-                    .requestMatchers("/error/**")
-                    .permitAll()
-                    .requestMatchers("/actuator/**")
-                    .permitAll()
+                    // Permitir OPTIONS para CORS preflight
+                    .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                    
+                    // Público: registro y login sin autenticación
+                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    
+                    // Público: errors y actuator
+                    .requestMatchers("/error/**").permitAll()
+                    .requestMatchers("/actuator/**").permitAll()
                     
                     // Catálogo público: cualquiera puede ver productos y categorías
-                    .requestMatchers(HttpMethod.GET, "/products/**")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/categories/**")
-                    .permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                     
-                    // Solo PHARMACIST: gestión de productos y categorías
-                    .requestMatchers(HttpMethod.POST, "/products/**")
-                    .hasAnyRole("PHARMACIST", "ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/products/**")
-                    .hasAnyRole("PHARMACIST", "ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/products/**")
-                    .hasAnyRole("PHARMACIST", "ADMIN")
-                    .requestMatchers(HttpMethod.POST, "/categories/**")
-                    .hasAnyRole("PHARMACIST", "ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/categories/**")
-                    .hasAnyRole("PHARMACIST", "ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/categories/**")
-                    .hasAnyRole("PHARMACIST", "ADMIN")
-                    
-                    // Flujo de compra: solo usuarios autenticados (principalmente USER)
-                    .requestMatchers("/cart/**")
-                    .hasAnyRole("USER", "PHARMACIST", "ADMIN")
-                    .requestMatchers("/orders/**")
-                    .hasAnyRole("USER", "PHARMACIST", "ADMIN")
-                    
-                    // Administración: solo ADMIN
-                    .requestMatchers("/api/v1/admin/**")
-                    .hasRole("ADMIN")
+                    // Cart y Orders requieren autenticación (manejado por @PreAuthorize en controllers)
+                    .requestMatchers("/api/v1/cart/**").authenticated()
+                    .requestMatchers("/api/v1/orders/**").authenticated()
                     
                     // Todo lo demás requiere autenticación
-                    .anyRequest()
-                    .authenticated()
+                    .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authenticationProvider)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // Orígenes permitidos
+        configuration.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "http://localhost:8080",
+            "http://localhost:8081"
+        ));
+        
+        // Métodos HTTP permitidos
+        configuration.setAllowedMethods(List.of(
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"
+        ));
+        
+        // Headers permitidos
+        configuration.setAllowedHeaders(List.of(
+            "Authorization", "Content-Type", "Accept"
+        ));
+        
+        // Headers expuestos en la respuesta
+        configuration.setExposedHeaders(List.of("Authorization"));
+        
+        // Permitir credenciales (cookies, auth headers)
+        configuration.setAllowCredentials(true);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        
+        return source;
     }
 }

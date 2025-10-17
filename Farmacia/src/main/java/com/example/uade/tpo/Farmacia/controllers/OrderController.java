@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER') or hasRole('PHARMACIST') or hasRole('ADMIN')")
 public class OrderController {

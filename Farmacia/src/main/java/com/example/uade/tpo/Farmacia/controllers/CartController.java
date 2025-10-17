@@ -12,7 +12,7 @@ import com.example.uade.tpo.Farmacia.service.CartService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/cart")
+@RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('USER') or hasRole('PHARMACIST') or hasRole('ADMIN')")
 public class CartController {

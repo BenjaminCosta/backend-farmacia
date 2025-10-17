@@ -42,7 +42,10 @@ public class AdminUserService {
 
         var jwtToken = jwtService.generateToken(user); 
         return AuthenticationResponse.builder()
-                .accessToken(jwtToken)
+                .token(jwtToken)
+                .role(user.getRole().getName())
+                .email(user.getEmail())
+                .name(user.getName())
                 .build();
     }
 }

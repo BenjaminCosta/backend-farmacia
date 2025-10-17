@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import ProductCard from '@/components/ProductCard';
 import Loader from '@/components/Loader';
 import apiClient from '@/lib/axios';
+import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
 
 interface Product {
   id: string;
@@ -43,7 +44,7 @@ const Catalog = () => {
   const fetchCategories = async () => {
     try {
       const response = await apiClient.get('/categories');
-      setCategories(response.data);
+      setCategories(normalizeCategories(response.data));
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -59,7 +60,7 @@ const Catalog = () => {
       params.append('size', size.toString());
 
       const response = await apiClient.get(`/products?${params.toString()}`);
-      setProducts(response.data.content || response.data);
+      setProducts(normalizeProducts(response.data));
     } catch (error) {
       console.error('Error fetching products:', error);
       // Mock data for development

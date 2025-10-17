@@ -14,7 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 const Navbar = () => {
-  const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isPharmacist, user, logout } = useAuth();
   const { totalItems } = useCart();
   const { items: wishlistItems } = useWishlist();
   const navigate = useNavigate();
@@ -43,6 +43,12 @@ const Navbar = () => {
             </Link>
             <Link to="/catalog" className="text-foreground hover:text-primary transition-colors">
               Productos
+            </Link>
+            <Link to="/about" className="text-foreground hover:text-primary transition-colors">
+              Sobre Nosotros
+            </Link>
+            <Link to="/contact" className="text-foreground hover:text-primary transition-colors">
+              Contacto
             </Link>
             {isAuthenticated && (
               <Link to="/orders" className="text-foreground hover:text-primary transition-colors">
@@ -106,12 +112,12 @@ const Navbar = () => {
                     <Heart className="mr-2 h-4 w-4" />
                     Favoritos
                   </DropdownMenuItem>
-                  {isAdmin && (
+                  {(isAdmin || isPharmacist) && (
                     <>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => navigate('/admin')}>
+                      <DropdownMenuItem onClick={() => navigate(isAdmin ? '/admin' : '/pharmacist')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Panel Admin
+                        {isAdmin ? 'Panel Admin' : 'Panel Farmacéutico'}
                       </DropdownMenuItem>
                     </>
                   )}

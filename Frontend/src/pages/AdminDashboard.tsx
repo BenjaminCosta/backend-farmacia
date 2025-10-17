@@ -15,6 +15,7 @@ import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
 import apiClient from '@/lib/axios';
 import { toast } from 'sonner';
+import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
 
 interface Product {
   id: string;
@@ -46,8 +47,8 @@ const AdminDashboard = () => {
         apiClient.get('/products'),
         apiClient.get('/categories'),
       ]);
-      setProducts(productsRes.data.content || productsRes.data);
-      setCategories(categoriesRes.data);
+      setProducts(normalizeProducts(productsRes.data));
+      setCategories(normalizeCategories(categoriesRes.data));
     } catch (error) {
       console.error('Error fetching data:', error);
       // Mock data
