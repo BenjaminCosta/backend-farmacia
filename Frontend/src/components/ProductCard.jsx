@@ -22,26 +22,45 @@ const ProductCard = ({ id, name, price, image, description }) => {
             addToWishlist({ id, name, price, image });
         }
     };
-    return (<Link to={`/product/${id}`}>
-      <Card className="group hover:shadow-lg transition-shadow duration-200 h-full">
+    return (<Link to={`/product/${id}`} className="block h-full">
+      <Card className="group hover:shadow-2xl hover:shadow-primary/10 transition-all duration-300 h-full border-border/50 hover:border-primary/50 hover:-translate-y-1 overflow-hidden">
         <CardContent className="p-0">
-          <div className="aspect-square bg-secondary overflow-hidden rounded-t-lg relative">
-            {image ? (<img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"/>) : (<div className="w-full h-full flex items-center justify-center">
-                <span className="text-muted-foreground">Sin imagen</span>
+          <div className="aspect-square bg-gradient-to-br from-secondary to-secondary/50 overflow-hidden relative">
+            {image ? (<img src={image} alt={name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>) : (<div className="w-full h-full flex items-center justify-center">
+                <span className="text-muted-foreground font-medium">Sin imagen</span>
               </div>)}
-            <Button variant="ghost" size="icon" className="absolute top-2 right-2 bg-background/80 hover:bg-background" onClick={handleToggleWishlist}>
-              <Heart className={cn('h-5 w-5', isInWishlist(id) ? 'fill-primary text-primary' : 'text-muted-foreground')}/>
+            
+            {/* Overlay gradient on hover */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"/>
+            
+            {/* Wishlist button */}
+            <Button variant="ghost" size="icon" className={cn("absolute top-3 right-3 backdrop-blur-md transition-all duration-300 shadow-lg", isInWishlist(id)
+                ? 'bg-primary/90 hover:bg-primary text-primary-foreground'
+                : 'bg-background/90 hover:bg-background/100')} onClick={handleToggleWishlist}>
+              <Heart className={cn('h-5 w-5 transition-transform duration-300', isInWishlist(id)
+                ? 'fill-current scale-110'
+                : 'group-hover:scale-110')}/>
             </Button>
           </div>
-          <div className="p-4">
-            <h3 className="font-semibold text-foreground mb-1 line-clamp-2">{name}</h3>
-            {description && (<p className="text-sm text-muted-foreground line-clamp-2 mb-2">{description}</p>)}
-            <p className="text-lg font-bold text-primary">{formatPrice(price)}</p>
+          
+          <div className="p-5 space-y-3">
+            <h3 className="font-bold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors duration-300 text-base leading-snug">
+              {name}
+            </h3>
+            {description && (<p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                {description}
+              </p>)}
+            <div className="flex items-baseline gap-2">
+              <p className="text-2xl font-bold text-primary tracking-tight">
+                {formatPrice(price)}
+              </p>
+            </div>
           </div>
         </CardContent>
-        <CardFooter className="p-4 pt-0">
-          <Button onClick={handleAddToCart} className="w-full" size="sm">
-            <ShoppingCart className="mr-2 h-4 w-4"/>
+        
+        <CardFooter className="p-5 pt-0">
+          <Button onClick={handleAddToCart} className="w-full font-semibold shadow-md hover:shadow-lg transition-all duration-300 group/btn" size="default">
+            <ShoppingCart className="mr-2 h-4 w-4 group-hover/btn:scale-110 transition-transform duration-300"/>
             Agregar al Carrito
           </Button>
         </CardFooter>

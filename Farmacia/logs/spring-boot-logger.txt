@@ -5431,3 +5431,459 @@ io.jsonwebtoken.security.SignatureException: JWT signature does not match locall
 2025-10-20T00:21:43.324-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
 2025-10-20T00:21:43.324-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[OrderDTO[id=10, status=COMPLETED, total=2500.0, items=[OrderItemDTO[productId=3, productName=Aspiri (truncated)...]
 2025-10-20T00:21:43.325-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T00:24:09.368-03:00  INFO 27812 --- [Farmacia] [restartedMain] c.e.u.tpo.Farmacia.FarmaciaApplication   : Starting FarmaciaApplication using Java 17.0.16 with PID 27812 (/Users/benjacosta/Documents/FarmaciaTPO/Farmacia/target/classes started by benjacosta in /Users/benjacosta/Documents/FarmaciaTPO/Farmacia)
+2025-10-20T00:24:09.369-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] c.e.u.tpo.Farmacia.FarmaciaApplication   : Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-10-20T00:24:09.369-03:00  INFO 27812 --- [Farmacia] [restartedMain] c.e.u.tpo.Farmacia.FarmaciaApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-10-20T00:24:09.631-03:00  INFO 27812 --- [Farmacia] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-10-20T00:24:09.653-03:00  INFO 27812 --- [Farmacia] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 20 ms. Found 8 JPA repository interfaces.
+2025-10-20T00:24:09.778-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 4002 (http)
+2025-10-20T00:24:09.779-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-10-20T00:24:09.779-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-10-20T00:24:09.787-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-10-20T00:24:09.787-03:00  INFO 27812 --- [Farmacia] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 417 ms
+2025-10-20T00:24:09.879-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-10-20T00:24:09.881-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-10-20T00:24:09.887-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-10-20T00:24:09.887-03:00  INFO 27812 --- [Farmacia] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2025-10-20T00:24:09.887-03:00  WARN 27812 --- [Farmacia] [restartedMain] c.zaxxer.hikari.util.DriverDataSource    : Registered driver with driverClassName=com.mysql.jdbc.Driver was not found, trying direct instantiation.
+2025-10-20T00:24:09.899-03:00  INFO 27812 --- [Farmacia] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4e2e773a
+2025-10-20T00:24:09.900-03:00  INFO 27812 --- [Farmacia] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2025-10-20T00:24:09.900-03:00  WARN 27812 --- [Farmacia] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-10-20T00:24:09.900-03:00  WARN 27812 --- [Farmacia] [restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-10-20T00:24:09.900-03:00  INFO 27812 --- [Farmacia] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-3)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-10-20T00:24:10.028-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-10-20T00:24:10.084-03:00  INFO 27812 --- [Farmacia] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-10-20T00:24:10.168-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] c.e.u.t.F.s.JwtAuthenticationFilter      : Filter 'jwtAuthenticationFilter' configured for use
+2025-10-20T00:24:10.168-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] o.s.w.f.ServerHttpObservationFilter      : Filter 'webMvcObservationFilter' configured for use
+2025-10-20T00:24:10.850-03:00  INFO 27812 --- [Farmacia] [restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-10-20T00:24:10.851-03:00  WARN 27812 --- [Farmacia] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-10-20T00:24:10.872-03:00  WARN 27812 --- [Farmacia] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-10-20T00:24:10.924-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 37 mappings in 'requestMappingHandlerMapping'
+2025-10-20T00:24:10.993-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**] in 'resourceHandlerMapping'
+2025-10-20T00:24:11.053-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2025-10-20T00:24:11.144-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with filters: DisableEncodeUrlFilter, WebAsyncManagerIntegrationFilter, SecurityContextHolderFilter, HeaderWriterFilter, CorsFilter, LogoutFilter, JwtAuthenticationFilter, RequestCacheAwareFilter, SecurityContextHolderAwareRequestFilter, AnonymousAuthenticationFilter, SessionManagementFilter, ExceptionTranslationFilter, AuthorizationFilter
+2025-10-20T00:24:11.216-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-10-20T00:24:11.237-03:00 DEBUG 27812 --- [Farmacia] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-10-20T00:24:11.301-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-10-20T00:24:11.318-03:00  INFO 27812 --- [Farmacia] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 4002 (http) with context path '/'
+2025-10-20T00:24:11.331-03:00  INFO 27812 --- [Farmacia] [restartedMain] c.e.u.tpo.Farmacia.FarmaciaApplication   : Started FarmaciaApplication in 1.981 seconds (process running for 234.662)
+2025-10-20T00:24:11.333-03:00  INFO 27812 --- [Farmacia] [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-10-20T00:24:41.176-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-10-20T00:24:41.176-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-10-20T00:24:41.176-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-10-20T00:24:41.176-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-10-20T00:24:41.176-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2025-10-20T00:24:41.177-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@75c6e84a
+2025-10-20T00:24:41.177-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@253afc5d
+2025-10-20T00:24:41.177-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-10-20T00:24:41.177-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-10-20T00:24:41.178-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/auth/authenticate
+2025-10-20T00:24:41.200-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/authenticate
+2025-10-20T00:24:41.201-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-10-20T00:24:41.202-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/authenticate
+2025-10-20T00:24:41.202-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : POST "/api/v1/auth/authenticate", parameters={}
+2025-10-20T00:24:41.202-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.auth.AuthenticationController#authenticate(AuthenticationRequest)
+2025-10-20T00:24:41.206-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [AuthenticationRequest(email=admin@farmacia.com, password=Admin123!)]
+2025-10-20T00:24:41.375-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2025-10-20T00:24:41.377-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.service.AuthenticationService  : Usuario autenticado exitosamente: admin@farmacia.com
+2025-10-20T00:24:41.379-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T00:24:41.380-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [AuthenticationResponse(token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBmYXJtYWNpYS5jb20iLCJpYXQiOjE3Nj (truncated)...]
+2025-10-20T00:24:41.381-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T00:24:44.258-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/admin/users
+2025-10-20T00:24:44.258-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/admin/roles
+2025-10-20T00:24:44.258-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/orders/all
+2025-10-20T00:24:44.263-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/orders/all
+2025-10-20T00:24:44.264-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/admin/roles
+2025-10-20T00:24:44.264-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/admin/users
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/admin/users
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/admin/roles
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/orders/all
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/admin/users", parameters={}
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/orders/all", parameters={}
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/admin/roles", parameters={}
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.admin.AdminController#getAllUsers()
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.admin.AdminController#getAllRoles()
+2025-10-20T00:24:44.276-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.OrderController#getAllOrders(Authentication)
+2025-10-20T00:24:44.277-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.admin.AdminController.getAllRoles(); target is of class [com.example.uade.tpo.Farmacia.controllers.admin.AdminController]
+2025-10-20T00:24:44.277-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.OrderController.getAllOrders(org.springframework.security.core.Authentication); target is of class [com.example.uade.tpo.Farmacia.controllers.OrderController]
+2025-10-20T00:24:44.277-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.admin.AdminController.getAllUsers(); target is of class [com.example.uade.tpo.Farmacia.controllers.admin.AdminController]
+2025-10-20T00:24:44.278-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.admin.AdminController.getAllRoles(); target is of class [com.example.uade.tpo.Farmacia.controllers.admin.AdminController]
+2025-10-20T00:24:44.278-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.admin.AdminController.getAllUsers(); target is of class [com.example.uade.tpo.Farmacia.controllers.admin.AdminController]
+2025-10-20T00:24:44.278-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.OrderController.getAllOrders(org.springframework.security.core.Authentication); target is of class [com.example.uade.tpo.Farmacia.controllers.OrderController]
+2025-10-20T00:24:44.279-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.c.admin.AdminController        : 📋 GET /api/v1/admin/roles - Listando roles
+2025-10-20T00:24:44.279-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-6] c.e.u.t.F.c.admin.AdminController        : 📋 GET /api/v1/admin/users - Listando usuarios
+2025-10-20T00:24:44.279-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-6] c.e.u.t.F.service.AdminUserService       : 👥 Listando todos los usuarios
+2025-10-20T00:24:44.279-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.service.AdminUserService       : 📋 Listando todos los roles
+2025-10-20T00:24:44.279-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.F.controllers.OrderController    : 🔐 GET /api/v1/orders/all - Admin/Farmacéutico: admin@farmacia.com
+2025-10-20T00:24:44.279-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.F.service.impl.OrderServiceImpl  : 🔐 Consultando TODAS las órdenes del sistema (Admin/Farmacéutico)
+2025-10-20T00:24:44.285-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.c.admin.AdminController        : ✅ 4 roles encontrados
+2025-10-20T00:24:44.287-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T00:24:44.287-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.example.uade.tpo.Farmacia.controllers.dto.RoleDTO@3686fa1a, com.example.uade.tpo.Farmacia.contr (truncated)...]
+2025-10-20T00:24:44.289-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-6] c.e.u.t.F.c.admin.AdminController        : ✅ 18 usuarios encontrados
+2025-10-20T00:24:44.289-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T00:24:44.290-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T00:24:44.294-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[AdminUserDTO[id=2, email=maria.garcia@demo.com, name=Maria Garcia, role=com.example.uade.tpo.Farmac (truncated)...]
+2025-10-20T00:24:44.297-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T00:24:44.298-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.F.service.impl.OrderServiceImpl  : ✅ Total de órdenes en el sistema: 10
+2025-10-20T00:24:44.299-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.F.controllers.OrderController    : ✅ Todas las órdenes recuperadas - Admin: admin@farmacia.com, Total Orders: 10
+2025-10-20T00:24:44.300-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T00:24:44.306-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[OrderDTO[id=10, status=COMPLETED, total=2500.0, items=[OrderItemDTO[productId=3, productName=Aspiri (truncated)...]
+2025-10-20T00:24:44.314-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T00:57:35.917-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=30m25s917ms).
+2025-10-20T01:19:19.006-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m43s48ms).
+2025-10-20T01:41:49.969-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m30s906ms).
+2025-10-20T01:58:13.388-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m53s412ms).
+2025-10-20T02:16:27.775-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=18m14s387ms).
+2025-10-20T02:28:06.108-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=11m8s348ms).
+2025-10-20T02:44:45.499-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m9s384ms).
+2025-10-20T03:01:37.636-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m52s137ms).
+2025-10-20T03:20:21.353-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=18m13s363ms).
+2025-10-20T03:38:25.608-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m34s255ms).
+2025-10-20T03:55:26.978-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m31s367ms).
+2025-10-20T04:12:45.227-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m18s249ms).
+2025-10-20T04:27:32.199-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=14m16s963ms).
+2025-10-20T04:46:21.431-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=18m19s226ms).
+2025-10-20T05:02:22.368-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m937ms).
+2025-10-20T05:19:44.849-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m52s429ms).
+2025-10-20T05:37:52.651-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m37s766ms).
+2025-10-20T05:54:09.166-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m46s513ms).
+2025-10-20T06:11:44.329-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m35s163ms).
+2025-10-20T06:18:16.419-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=6m2s106ms).
+2025-10-20T06:19:32.378-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=45s952ms).
+2025-10-20T06:35:35.145-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m32s761ms).
+2025-10-20T06:51:50.035-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=16m14s890ms).
+2025-10-20T07:09:22.467-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m2s311ms).
+2025-10-20T07:25:29.962-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m37s487ms).
+2025-10-20T07:43:38.440-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m38s473ms).
+2025-10-20T08:59:05.873-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m56s719ms).
+2025-10-20T09:16:10.199-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=17m4s327ms).
+2025-10-20T09:19:19.585-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=2m39s373ms).
+2025-10-20T09:35:27.497-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=15m37s907ms).
+2025-10-20T09:44:03.651-03:00  WARN 27812 --- [Farmacia] [HikariPool-3:housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Thread starvation or clock leap detected (housekeeper delta=8m6s146ms).
+2025-10-20T09:50:46.260-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T09:50:46.260-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T09:50:46.262-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-10-20T09:50:46.262-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-10-20T09:50:46.263-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T09:50:46.263-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T09:50:46.263-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T09:50:46.263-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T09:50:46.264-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T09:50:46.264-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T09:50:46.269-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T09:50:46.270-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T09:50:46.270-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T09:50:46.270-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T09:50:46.271-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T09:50:46.284-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T09:50:46.284-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T09:50:46.285-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T09:50:46.286-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T09:50:46.287-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:50:46.287-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:50:46.290-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T09:50:46.291-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T09:50:46.294-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:50:46.294-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:54:00.759-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/auth/authenticate
+2025-10-20T09:54:00.782-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/v1/auth/authenticate
+2025-10-20T09:54:00.783-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-10-20T09:54:00.783-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/v1/auth/authenticate
+2025-10-20T09:54:00.783-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.web.servlet.DispatcherServlet        : POST "/api/v1/auth/authenticate", parameters={}
+2025-10-20T09:54:00.784-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.auth.AuthenticationController#authenticate(AuthenticationRequest)
+2025-10-20T09:54:00.785-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [AuthenticationRequest(email=farmaceutico@farmacia.com, password=farmacia123)]
+2025-10-20T09:54:00.878-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.s.a.dao.DaoAuthenticationProvider    : Authenticated user
+2025-10-20T09:54:00.880-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-6] c.e.u.t.F.service.AuthenticationService  : Usuario autenticado exitosamente: farmaceutico@farmacia.com
+2025-10-20T09:54:00.881-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:54:00.882-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [AuthenticationResponse(token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJmYXJtYWNldXRpY29AZmFybWFjaWEuY29tIiwiaW (truncated)...]
+2025-10-20T09:54:00.882-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:03.077-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/categories
+2025-10-20T09:58:03.077-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T09:58:03.083-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T09:58:03.083-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:03.102-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:03.102-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T09:58:03.102-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T09:58:03.102-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T09:58:03.103-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T09:58:03.103-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T09:58:03.106-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T09:58:03.106-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T09:58:03.106-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T09:58:03.106-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T09:58:03.106-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T09:58:03.111-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T09:58:03.111-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T09:58:03.111-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:03.111-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T09:58:03.112-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:03.121-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T09:58:03.121-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T09:58:03.121-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:03.122-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T09:58:03.123-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:06.478-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T09:58:06.480-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:06.492-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T09:58:06.492-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T09:58:06.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T09:58:06.493-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T09:58:06.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T09:58:06.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:06.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T09:58:06.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T09:58:06.494-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-4] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T09:58:06.494-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T09:58:06.494-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T09:58:06.496-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T09:58:06.496-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T09:58:06.497-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:06.497-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T09:58:06.498-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:06.502-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-4] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T09:58:06.502-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-4] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T09:58:06.503-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:06.504-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T09:58:06.508-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:13.640-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/orders
+2025-10-20T09:58:13.645-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/orders
+2025-10-20T09:58:13.658-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/orders
+2025-10-20T09:58:13.658-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/orders", parameters={}
+2025-10-20T09:58:13.658-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.OrderController#myOrders(Authentication)
+2025-10-20T09:58:13.659-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] horizationManagerBeforeMethodInterceptor : Authorizing method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.OrderController.myOrders(org.springframework.security.core.Authentication); target is of class [com.example.uade.tpo.Farmacia.controllers.OrderController]
+2025-10-20T09:58:13.660-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] horizationManagerBeforeMethodInterceptor : Authorized method invocation ReflectiveMethodInvocation: public org.springframework.http.ResponseEntity com.example.uade.tpo.Farmacia.controllers.OrderController.myOrders(org.springframework.security.core.Authentication); target is of class [com.example.uade.tpo.Farmacia.controllers.OrderController]
+2025-10-20T09:58:13.661-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.controllers.OrderController    : 📋 GET /api/v1/orders - Usuario: farmaceutico@farmacia.com
+2025-10-20T09:58:13.682-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.service.impl.OrderServiceImpl  : 📋 Consultando órdenes para usuario: farmaceutico@farmacia.com - Encontradas: 0
+2025-10-20T09:58:13.684-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.controllers.OrderController    : ✅ Órdenes recuperadas - Usuario: farmaceutico@farmacia.com, Count: 0
+2025-10-20T09:58:13.686-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:13.686-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[]]
+2025-10-20T09:58:13.688-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:24.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/categories
+2025-10-20T09:58:24.493-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T09:58:24.499-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T09:58:24.499-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:24.510-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T09:58:24.510-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:24.511-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T09:58:24.511-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T09:58:24.511-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T09:58:24.511-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T09:58:24.512-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T09:58:24.512-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T09:58:24.512-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T09:58:24.512-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T09:58:24.512-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T09:58:24.517-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T09:58:24.517-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T09:58:24.518-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:24.518-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T09:58:24.520-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:24.523-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T09:58:24.524-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T09:58:24.525-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:24.525-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T09:58:24.526-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:30.685-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products/3
+2025-10-20T09:58:30.690-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products/3
+2025-10-20T09:58:30.705-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products/3
+2025-10-20T09:58:30.705-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products/3", parameters={}
+2025-10-20T09:58:30.706-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#get(Long)
+2025-10-20T09:58:30.707-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.controllers.ProductController  : GET /products/3
+2025-10-20T09:58:30.707-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.Farmacia.service.ProductService  : Fetching product with ID: 3
+2025-10-20T09:58:30.715-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.controllers.ProductController  : Returning product DTO - name: Aspirina 500mg, price: 2500.0, stock: 68
+2025-10-20T09:58:30.723-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:30.724-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ProductDTO[id=3, name=Aspirina 500mg, description=Caja x 20, price=2500.0, stock=68, discount=0.0, c (truncated)...]
+2025-10-20T09:58:30.726-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:32.973-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/categories
+2025-10-20T09:58:32.973-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T09:58:32.979-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:32.978-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T09:58:32.992-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T09:58:32.992-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T09:58:32.992-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T09:58:32.992-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T09:58:32.993-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T09:58:32.993-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T09:58:32.993-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T09:58:32.993-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T09:58:32.993-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T09:58:32.993-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T09:58:32.993-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T09:58:32.997-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T09:58:32.997-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T09:58:32.998-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:32.998-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T09:58:32.999-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T09:58:33.000-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T09:58:33.000-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T09:58:33.000-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T09:58:33.001-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T09:58:33.002-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:00:24.708-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T10:00:24.708-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/categories
+2025-10-20T10:00:24.713-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T10:00:24.712-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T10:00:24.732-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T10:00:24.732-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T10:00:24.732-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T10:00:24.732-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T10:00:24.732-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T10:00:24.732-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:00:24.733-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T10:00:24.733-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T10:00:24.733-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T10:00:24.733-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T10:00:24.733-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T10:00:24.737-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T10:00:24.737-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T10:00:24.738-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:00:24.738-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T10:00:24.739-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:00:24.741-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T10:00:24.741-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T10:00:24.742-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:00:24.742-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T10:00:24.743-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:02.614-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/categories
+2025-10-20T10:01:02.617-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T10:01:02.619-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T10:01:02.623-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:02.634-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T10:01:02.639-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T10:01:02.640-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T10:01:02.642-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T10:01:02.642-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T10:01:02.644-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:02.645-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T10:01:02.646-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:02.647-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T10:01:02.647-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T10:01:02.647-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T10:01:02.651-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T10:01:02.651-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-7] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T10:01:02.652-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:02.652-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T10:01:02.653-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:02.662-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T10:01:02.662-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T10:01:02.663-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:02.663-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T10:01:02.664-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:11.773-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?q=n&page=0&size=12
+2025-10-20T10:01:11.777-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?q=n&page=0&size=12
+2025-10-20T10:01:11.788-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?q=n&page=0&size=12
+2025-10-20T10:01:11.789-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?q=n&page=0&size=12", parameters={masked}
+2025-10-20T10:01:11.789-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:11.797-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'n', inStock: null
+2025-10-20T10:01:11.797-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'n', inStock: null
+2025-10-20T10:01:11.797-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.Farmacia.service.ProductService  : Searching by name: 'n'
+2025-10-20T10:01:11.817-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.Farmacia.service.ProductService  : Returning 4 products
+2025-10-20T10:01:11.817-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-8] c.e.u.t.F.controllers.ProductController  : Found 4 products
+2025-10-20T10:01:11.817-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:11.818-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T10:01:11.818-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:15.356-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?q=ny&page=0&size=12
+2025-10-20T10:01:15.359-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?q=ny&page=0&size=12
+2025-10-20T10:01:15.366-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?q=ny&page=0&size=12
+2025-10-20T10:01:15.366-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?q=ny&page=0&size=12", parameters={masked}
+2025-10-20T10:01:15.366-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:15.367-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'ny', inStock: null
+2025-10-20T10:01:15.367-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'ny', inStock: null
+2025-10-20T10:01:15.367-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.Farmacia.service.ProductService  : Searching by name: 'ny'
+2025-10-20T10:01:15.369-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.Farmacia.service.ProductService  : Returning 0 products
+2025-10-20T10:01:15.369-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.controllers.ProductController  : Found 0 products
+2025-10-20T10:01:15.370-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:15.370-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[]]
+2025-10-20T10:01:15.370-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:15.505-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?q=nyy&page=0&size=12
+2025-10-20T10:01:15.507-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?q=nyy&page=0&size=12
+2025-10-20T10:01:15.514-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?q=nyy&page=0&size=12
+2025-10-20T10:01:15.514-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?q=nyy&page=0&size=12", parameters={masked}
+2025-10-20T10:01:15.514-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:15.514-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'nyy', inStock: null
+2025-10-20T10:01:15.514-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'nyy', inStock: null
+2025-10-20T10:01:15.515-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Searching by name: 'nyy'
+2025-10-20T10:01:15.516-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Returning 0 products
+2025-10-20T10:01:15.517-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : Found 0 products
+2025-10-20T10:01:15.517-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:15.517-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[]]
+2025-10-20T10:01:15.518-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:21.806-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-4] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T10:01:21.809-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:21.817-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:21.817-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T10:01:21.817-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:21.818-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T10:01:21.818-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T10:01:21.818-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T10:01:21.825-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T10:01:21.825-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-2] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T10:01:21.825-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:21.826-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T10:01:21.826-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:37.106-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-7] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products/5
+2025-10-20T10:01:37.111-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products/5
+2025-10-20T10:01:37.122-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products/5
+2025-10-20T10:01:37.122-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products/5", parameters={}
+2025-10-20T10:01:37.123-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#get(Long)
+2025-10-20T10:01:37.123-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.F.controllers.ProductController  : GET /products/5
+2025-10-20T10:01:37.123-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.Farmacia.service.ProductService  : Fetching product with ID: 5
+2025-10-20T10:01:37.127-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-3] c.e.u.t.F.controllers.ProductController  : Returning product DTO - name: Omeprazol 20mg, price: 5500.0, stock: 59
+2025-10-20T10:01:37.128-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:37.128-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [ProductDTO[id=5, name=Omeprazol 20mg, description=Caja x 14 cápsulas, price=5500.0, stock=59, discou (truncated)...]
+2025-10-20T10:01:37.129-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:42.041-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-6] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/categories
+2025-10-20T10:01:42.041-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-8] o.s.security.web.FilterChainProxy        : Securing OPTIONS /api/v1/products?page=0&size=12
+2025-10-20T10:01:42.046-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:42.046-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T10:01:42.058-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T10:01:42.058-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:42.058-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T10:01:42.058-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T10:01:42.058-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T10:01:42.059-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:42.059-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T10:01:42.059-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T10:01:42.059-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T10:01:42.059-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T10:01:42.059-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T10:01:42.064-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T10:01:42.064-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-10] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T10:01:42.065-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:42.065-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T10:01:42.066-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:42.067-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T10:01:42.067-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-1] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T10:01:42.069-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:42.069-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T10:01:42.071-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:46.933-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:46.933-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/v1/categories
+2025-10-20T10:01:46.943-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/products?page=0&size=12
+2025-10-20T10:01:46.943-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/v1/categories
+2025-10-20T10:01:46.943-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/products?page=0&size=12", parameters={masked}
+2025-10-20T10:01:46.943-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/api/v1/categories", parameters={}
+2025-10-20T10:01:46.943-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.ProductController#list(Long, String, Boolean)
+2025-10-20T10:01:46.943-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.example.uade.tpo.Farmacia.controllers.CategoryControllers#getAll()
+2025-10-20T10:01:46.944-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.c.CategoryControllers          : GET /categories - Fetching all categories
+2025-10-20T10:01:46.944-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.service.CategoryService        : Fetching all categories
+2025-10-20T10:01:46.944-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : GET /products - categoryId: null, q: 'null', inStock: null
+2025-10-20T10:01:46.944-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Listing products with filters - categoryId: null, query: 'null', inStock: null
+2025-10-20T10:01:46.944-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Fetching all products
+2025-10-20T10:01:46.950-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.service.CategoryService        : Found 5 categories
+2025-10-20T10:01:46.950-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-9] c.e.u.t.F.c.CategoryControllers          : Found 5 categories
+2025-10-20T10:01:46.951-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:46.951-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[CategoryResponse[id=1, name=Analgésicos, description=Dolor y fiebre], CategoryResponse[id=2, name=A (truncated)...]
+2025-10-20T10:01:46.951-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-10-20T10:01:46.953-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.Farmacia.service.ProductService  : Returning 6 products
+2025-10-20T10:01:46.953-03:00  INFO 27812 --- [Farmacia] [http-nio-4002-exec-5] c.e.u.t.F.controllers.ProductController  : Found 6 products
+2025-10-20T10:01:46.953-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-10-20T10:01:46.954-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[ProductDTO[id=1, name=Ibuprofeno 400mg, description=Caja x 10, price=3500.0, stock=91, discount=0.0 (truncated)...]
+2025-10-20T10:01:46.962-03:00 DEBUG 27812 --- [Farmacia] [http-nio-4002-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
