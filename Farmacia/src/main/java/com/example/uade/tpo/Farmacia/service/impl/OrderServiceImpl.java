@@ -2,7 +2,6 @@ package com.example.uade.tpo.Farmacia.service.impl;
 
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderResponse;
-import com.example.uade.tpo.Farmacia.controllers.dto.DeliveryDTO;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderDTO;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderItemDTO;
 import com.example.uade.tpo.Farmacia.entity.Order;
@@ -175,7 +174,7 @@ public class OrderServiceImpl implements OrderService {
   public List<OrderDTO> getAllOrdersDTO() {
     log.info("🔐 Consultando TODAS las órdenes del sistema (Admin/Farmacéutico)");
     
-    List<Order> allOrders = orders.findAll();
+    List<Order> allOrders = orders.findAllWithItems();
     log.info("✅ Total de órdenes en el sistema: {}", allOrders.size());
     
     return allOrders.stream()
@@ -206,6 +205,45 @@ public class OrderServiceImpl implements OrderService {
     return toDTO(orders.save(o));
   }
 
+  @Override
+  public OrderDTO processOrder(Long id, Order.Status newStatus) {
+    log.info("🔄 Procesando orden {} - Nuevo estado: {}", id, newStatus);
+    
+    Order order = orders.findById(id)
+        .orElseThrow(() -> {
+          log.error("❌ Orden {} no encontrada", id);
+          return new NotFoundException("Orden no encontrada con ID: " + id);
+        });
+    
+    // Validar transiciones de estado permitidas
+    Order.Status currentStatus = order.getStatus();
+    
+    log.debug("Estado actual: {} -> Nuevo estado: {}", currentStatus, newStatus);
+    
+    // PENDING puede ir a PROCESSING, COMPLETED o CANCELLED
+    // PROCESSING puede ir a COMPLETED o CANCELLED
+    // COMPLETED es final (no puede cambiar)
+    // CANCELLED es final (no puede cambiar)
+    
+    if (currentStatus == Order.Status.COMPLETED) {
+      log.warn("⚠️ No se puede cambiar el estado de una orden completada - Orden: {}", id);
+      throw new IllegalStateException("No se puede cambiar el estado de una orden completada");
+    }
+    
+    if (currentStatus == Order.Status.CANCELLED) {
+      log.warn("⚠️ No se puede cambiar el estado de una orden cancelada - Orden: {}", id);
+      throw new IllegalStateException("No se puede cambiar el estado de una orden cancelada");
+    }
+    
+    // Actualizar el estado
+    order.setStatus(newStatus);
+    Order updatedOrder = orders.save(order);
+    
+    log.info("✅ Orden {} actualizada - Estado: {} -> {}", id, currentStatus, newStatus);
+    
+    return toDTO(updatedOrder);
+  }
+
   // ================= Helpers =================
 
   private OrderDTO toDTO(Order order) {
@@ -215,10 +253,9 @@ public class OrderServiceImpl implements OrderService {
         .map(this::toItemDTO)
         .collect(Collectors.toList());
     
-    // Calcular total desde items (para asegurar consistencia)
-    double total = itemDTOs.stream()
-        .mapToDouble(OrderItemDTO::lineTotal)
-        .sum();
+    // Usar el total guardado en la orden (más confiable)
+    double total = order.getTotal() != null ? 
+        order.getTotal().doubleValue() : 0.0;
     
     // Formatear fecha
     DateTimeFormatter formatter = DateTimeFormatter.ISO_INSTANT;

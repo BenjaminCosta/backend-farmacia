@@ -53,6 +53,8 @@ public class SecurityConfig {
                     
                     // Rutas de órdenes y gestión: ADMIN tiene acceso total
                     .requestMatchers("/api/v1/orders/all").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PUT, "/api/v1/orders/*/status").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/*/status").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")

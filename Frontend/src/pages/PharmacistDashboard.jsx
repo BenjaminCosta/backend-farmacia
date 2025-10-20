@@ -66,9 +66,11 @@ const PharmacistDashboard = () => {
             // Solo intentar cargar pedidos si el usuario es ADMIN o PHARMACIST
             let ordersData = [];
             try {
-                const ordersRes = await apiClient.get('/orders');
+                // Farmacéuticos y admins ven TODAS las órdenes del sistema
+                const ordersRes = await apiClient.get('/orders/all');
                 ordersData = normalizeOrders(ordersRes.data);
                 setOrders(ordersData);
+                console.log('Órdenes cargadas:', ordersData);
             }
             catch (error) {
                 console.log('No se pudieron cargar los pedidos:', error);

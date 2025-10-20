@@ -13,7 +13,7 @@ import java.util.*;
 @Table(name = "orders")
 public class Order {
 
-  public enum Status { PENDING, PAID, CANCELLED }
+  public enum Status { PENDING, PROCESSING, COMPLETED, CANCELLED }
 
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -26,7 +26,7 @@ public class Order {
   private BigDecimal total;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
+  @Column(name = "status", length = 20, nullable = false)
   private Status status = Status.PENDING;
 
   @Column(nullable = false)

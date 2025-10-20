@@ -3,6 +3,7 @@ package com.example.uade.tpo.Farmacia.controllers;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderResponse;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderDTO;
+import com.example.uade.tpo.Farmacia.controllers.dto.UpdateOrderStatusRequest;
 import com.example.uade.tpo.Farmacia.entity.Order;
 import com.example.uade.tpo.Farmacia.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -132,10 +133,67 @@ public class OrderController {
     }
   }
 
+  /**
+   * PUT /api/v1/orders/{id}/status - Actualizar estado de orden (Farmacéutico/Admin)
+   * Este endpoint permite cambiar el estado de una orden.
+   * Frontend envía: { "status": "PENDING" | "PAID" | "CANCELLED" }
+   */
+  @PutMapping("/{id}/status")
+  @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
+  public ResponseEntity<OrderDTO> updateOrderStatus(
+      @PathVariable Long id,
+      @RequestBody UpdateOrderStatusRequest request,
+      Authentication auth) {
+    
+    String userEmail = auth.getName();
+    log.info("🔄 PUT /api/v1/orders/{}/status - Usuario: {}, Nuevo estado: {}", 
+             id, userEmail, request.getStatus());
+    
+    try {
+      if (request.getStatus() == null) {
+        log.warn("❌ Estado no proporcionado en la solicitud - Orden: {}", id);
+        throw new IllegalArgumentException("El estado es requerido");
+      }
+      
+      OrderDTO updatedOrder = service.processOrder(id, request.getStatus());
+      
+      log.info("✅ Estado de orden actualizado - ID: {}, Nuevo estado: {}", 
+               id, request.getStatus());
+      return ResponseEntity.ok(updatedOrder);
+      
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      log.error("❌ Error de validación al actualizar orden {} - Error: {}", 
+                id, e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      log.error("❌ Error inesperado al actualizar orden {} - Error: {}", 
+                id, e.getMessage(), e);
+      throw e;
+    }
+  }
+
+  /**
+   * PATCH /api/v1/orders/{id}/status - Actualizar estado de orden (Farmacéutico/Admin)
+   * Endpoint alternativo con PATCH (mantiene compatibilidad)
+   */
   @PatchMapping("/{id}/status")
   @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
-  public OrderDTO changeStatus(@PathVariable Long id,
-                            @RequestParam Order.Status status) {
-    return service.setStatusDTO(id, status);
+  public ResponseEntity<OrderDTO> patchOrderStatus(
+      @PathVariable Long id,
+      @RequestParam Order.Status status,
+      Authentication auth) {
+    
+    String userEmail = auth.getName();
+    log.info("🔄 PATCH /api/v1/orders/{}/status - Usuario: {}, Nuevo estado: {}", 
+             id, userEmail, status);
+    
+    try {
+      OrderDTO updatedOrder = service.processOrder(id, status);
+      log.info("✅ Estado de orden actualizado - ID: {}, Nuevo estado: {}", id, status);
+      return ResponseEntity.ok(updatedOrder);
+    } catch (Exception e) {
+      log.error("❌ Error al actualizar orden {} - Error: {}", id, e.getMessage());
+      throw e;
+    }
   }
 }

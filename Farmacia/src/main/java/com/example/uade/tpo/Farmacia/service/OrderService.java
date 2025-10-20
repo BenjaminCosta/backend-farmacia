@@ -13,6 +13,7 @@ public interface OrderService {
   List<OrderDTO> myOrdersDTO(String email);
   OrderDTO getUserOrderDTO(Long id, String email);
   OrderDTO setStatusDTO(Long id, Order.Status status);
+  OrderDTO processOrder(Long id, Order.Status newStatus);
   List<OrderDTO> byUserIdDTO(Long userId);
   List<OrderDTO> getAllOrdersDTO();
 }
