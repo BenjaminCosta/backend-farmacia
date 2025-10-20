@@ -43,11 +43,14 @@ public class ProductController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<Product> get(@PathVariable Long id) {
+  public ResponseEntity<ProductDTO> get(@PathVariable Long id) {
     try {
       log.info("GET /products/{}", id);
       Product product = service.get(id);
-      return ResponseEntity.ok(product);
+      ProductDTO dto = toProductDTO(product);
+      log.info("Returning product DTO - name: {}, price: {}, stock: {}", 
+               dto.name(), dto.price(), dto.stock());
+      return ResponseEntity.ok(dto);
     } catch (Exception ex) {
       log.error("Error getting product {}: {}", id, ex.getMessage());
       throw ex;
