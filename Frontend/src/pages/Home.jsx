@@ -64,7 +64,6 @@ const Home = () => {
         <div className="relative container mx-auto px-4 h-full flex items-center">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm px-5 py-2.5 rounded-full mb-6 animate-in fade-in slide-in-from-bottom-3 duration-700">
-              <Star className="h-4 w-4 text-primary-foreground fill-primary-foreground"/>
               <span className="text-primary-foreground text-sm font-semibold">Más de 35 años de experiencia</span>
             </div>
             
