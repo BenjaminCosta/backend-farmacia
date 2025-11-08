@@ -9,12 +9,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
 import apiClient from '@/lib/axios';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { normalizeProducts, normalizeCategories, normalizeOrders } from '@/lib/adapters';
+import ProductImageManager from '@/components/ProductImageManager';
 const PharmacistDashboard = () => {
     const { user } = useAuth();
     const [products, setProducts] = useState([]);
@@ -31,6 +33,7 @@ const PharmacistDashboard = () => {
     const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
     const [editProductModalOpen, setEditProductModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [newlyCreatedProductId, setNewlyCreatedProductId] = useState(null);
     // Estados para formularios de productos
     const [productForm, setProductForm] = useState({
         nombre: '',
@@ -158,6 +161,7 @@ const PharmacistDashboard = () => {
             descuento: '',
             categoryId: '',
         });
+        setNewlyCreatedProductId(null);
         setCreateProductModalOpen(true);
     };
     const handleOpenEditProductModal = (product) => {
@@ -190,9 +194,12 @@ const PharmacistDashboard = () => {
                 },
             };
             const response = await apiClient.post('/products', payload);
+            const createdProduct = response.data;
             toast.success('Producto creado exitosamente');
-            setCreateProductModalOpen(false);
-            fetchData(); // Recargar datos
+            setNewlyCreatedProductId(createdProduct.id);
+            // No cerrar el modal, mostrar gestor de imágenes
+            // setCreateProductModalOpen(false);
+            // fetchData(); // Recargar datos después de subir imágenes
         }
         catch (error) {
             console.error('Error creating product:', error);
@@ -564,127 +571,167 @@ const PharmacistDashboard = () => {
       </div>
 
       {/* Modal de Crear Producto */}
-      <Dialog open={createProductModalOpen} onOpenChange={setCreateProductModalOpen}>
-        <DialogContent className="max-w-md">
+      <Dialog open={createProductModalOpen} onOpenChange={(open) => {
+        setCreateProductModalOpen(open);
+        if (!open) {
+          setNewlyCreatedProductId(null);
+          fetchData(); // Recargar datos al cerrar
+        }
+      }}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Crear Nuevo Producto</DialogTitle>
+            <DialogTitle>
+              {newlyCreatedProductId ? 'Agregar Imágenes al Producto' : 'Crear Nuevo Producto'}
+            </DialogTitle>
             <DialogDescription>
-              Completa los datos del nuevo producto para agregarlo al inventario
+              {newlyCreatedProductId 
+                ? 'Sube imágenes para el producto recién creado' 
+                : 'Completa los datos del nuevo producto para agregarlo al inventario'}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreateProduct}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="create-nombre">Nombre *</Label>
-                <Input id="create-nombre" placeholder="Ej: Ibuprofeno 400mg" value={productForm.nombre} onChange={(e) => setProductForm({ ...productForm, nombre: e.target.value })} required/>
+
+          {!newlyCreatedProductId ? (
+            <form onSubmit={handleCreateProduct}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="create-nombre">Nombre *</Label>
+                  <Input id="create-nombre" placeholder="Ej: Ibuprofeno 400mg" value={productForm.nombre} onChange={(e) => setProductForm({ ...productForm, nombre: e.target.value })} required/>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="create-descripcion">Descripción</Label>
+                  <Input id="create-descripcion" placeholder="Descripción del producto" value={productForm.descripcion} onChange={(e) => setProductForm({ ...productForm, descripcion: e.target.value })}/>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="create-precio">Precio *</Label>
+                  <Input id="create-precio" type="number" step="0.01" min="0" placeholder="0.00" value={productForm.precio} onChange={(e) => setProductForm({ ...productForm, precio: e.target.value })} required/>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="create-stock">Stock</Label>
+                  <Input id="create-stock" type="number" min="0" placeholder="0" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}/>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="create-descuento">Descuento (%)</Label>
+                  <Input id="create-descuento" type="number" step="0.01" min="0" max="100" placeholder="0" value={productForm.descuento} onChange={(e) => setProductForm({ ...productForm, descuento: e.target.value })}/>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="create-category">Categoría *</Label>
+                  <Select value={productForm.categoryId} onValueChange={(value) => setProductForm({ ...productForm, categoryId: value })} required>
+                    <SelectTrigger id="create-category">
+                      <SelectValue placeholder="Selecciona una categoría"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (<SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="create-descripcion">Descripción</Label>
-                <Input id="create-descripcion" placeholder="Descripción del producto" value={productForm.descripcion} onChange={(e) => setProductForm({ ...productForm, descripcion: e.target.value })}/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="create-precio">Precio *</Label>
-                <Input id="create-precio" type="number" step="0.01" min="0" placeholder="0.00" value={productForm.precio} onChange={(e) => setProductForm({ ...productForm, precio: e.target.value })} required/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="create-stock">Stock</Label>
-                <Input id="create-stock" type="number" min="0" placeholder="0" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="create-descuento">Descuento (%)</Label>
-                <Input id="create-descuento" type="number" step="0.01" min="0" max="100" placeholder="0" value={productForm.descuento} onChange={(e) => setProductForm({ ...productForm, descuento: e.target.value })}/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="create-category">Categoría *</Label>
-                <Select value={productForm.categoryId} onValueChange={(value) => setProductForm({ ...productForm, categoryId: value })} required>
-                  <SelectTrigger id="create-category">
-                    <SelectValue placeholder="Selecciona una categoría"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (<SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setCreateProductModalOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Crear Producto</Button>
+              </DialogFooter>
+            </form>
+          ) : (
+            <div className="py-4">
+              <ProductImageManager productId={newlyCreatedProductId} />
+              <DialogFooter className="mt-6">
+                <Button onClick={() => setCreateProductModalOpen(false)}>
+                  Finalizar
+                </Button>
+              </DialogFooter>
             </div>
-            
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setCreateProductModalOpen(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">Crear Producto</Button>
-            </DialogFooter>
-          </form>
+          )}
         </DialogContent>
       </Dialog>
 
       {/* Modal de Editar Producto */}
       <Dialog open={editProductModalOpen} onOpenChange={setEditProductModalOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Producto</DialogTitle>
+            <DialogTitle>Editar Producto: {selectedProduct?.name}</DialogTitle>
             <DialogDescription>
-              Modifica los datos del producto seleccionado
+              Modifica los datos del producto y gestiona sus imágenes
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleUpdateProduct}>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="edit-nombre">Nombre *</Label>
-                <Input id="edit-nombre" placeholder="Ej: Ibuprofeno 400mg" value={productForm.nombre} onChange={(e) => setProductForm({ ...productForm, nombre: e.target.value })} required/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-descripcion">Descripción</Label>
-                <Input id="edit-descripcion" placeholder="Descripción del producto" value={productForm.descripcion} onChange={(e) => setProductForm({ ...productForm, descripcion: e.target.value })}/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-precio">Precio *</Label>
-                <Input id="edit-precio" type="number" step="0.01" min="0" placeholder="0.00" value={productForm.precio} onChange={(e) => setProductForm({ ...productForm, precio: e.target.value })} required/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-stock">Stock</Label>
-                <Input id="edit-stock" type="number" min="0" placeholder="0" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-descuento">Descuento (%)</Label>
-                <Input id="edit-descuento" type="number" step="0.01" min="0" max="100" placeholder="0" value={productForm.descuento} onChange={(e) => setProductForm({ ...productForm, descuento: e.target.value })}/>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-category">Categoría *</Label>
-                <Select value={productForm.categoryId} onValueChange={(value) => setProductForm({ ...productForm, categoryId: value })} required>
-                  <SelectTrigger id="edit-category">
-                    <SelectValue placeholder="Selecciona una categoría"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((category) => (<SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => {
-            setEditProductModalOpen(false);
-            setSelectedProduct(null);
-        }}>
-                Cancelar
-              </Button>
-              <Button type="submit">Guardar Cambios</Button>
-            </DialogFooter>
-          </form>
+
+          <Tabs defaultValue="info" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="info">Información</TabsTrigger>
+              <TabsTrigger value="images">Imágenes</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="info">
+              <form onSubmit={handleUpdateProduct}>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-nombre">Nombre *</Label>
+                    <Input id="edit-nombre" placeholder="Ej: Ibuprofeno 400mg" value={productForm.nombre} onChange={(e) => setProductForm({ ...productForm, nombre: e.target.value })} required/>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-descripcion">Descripción</Label>
+                    <Input id="edit-descripcion" placeholder="Descripción del producto" value={productForm.descripcion} onChange={(e) => setProductForm({ ...productForm, descripcion: e.target.value })}/>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-precio">Precio *</Label>
+                    <Input id="edit-precio" type="number" step="0.01" min="0" placeholder="0.00" value={productForm.precio} onChange={(e) => setProductForm({ ...productForm, precio: e.target.value })} required/>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-stock">Stock</Label>
+                    <Input id="edit-stock" type="number" min="0" placeholder="0" value={productForm.stock} onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}/>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-descuento">Descuento (%)</Label>
+                    <Input id="edit-descuento" type="number" step="0.01" min="0" max="100" placeholder="0" value={productForm.descuento} onChange={(e) => setProductForm({ ...productForm, descuento: e.target.value })}/>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-category">Categoría *</Label>
+                    <Select value={productForm.categoryId} onValueChange={(value) => setProductForm({ ...productForm, categoryId: value })} required>
+                      <SelectTrigger id="edit-category">
+                        <SelectValue placeholder="Selecciona una categoría"/>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (<SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <DialogFooter className="mt-6">
+                  <Button type="button" variant="outline" onClick={() => {
+                setEditProductModalOpen(false);
+                setSelectedProduct(null);
+            }}>
+                    Cancelar
+                  </Button>
+                  <Button type="submit">Guardar Cambios</Button>
+                </DialogFooter>
+              </form>
+            </TabsContent>
+
+            <TabsContent value="images">
+              {selectedProduct && (
+                <div className="py-4">
+                  <ProductImageManager productId={selectedProduct.id} />
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
 

@@ -84,43 +84,43 @@ const Catalog = () => {
         params.set('page', '0');
         setSearchParams(params);
     };
-    return (<div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
-      <div className="container mx-auto px-4 py-8">
+    return (<div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/10">
+      <div className="container mx-auto px-4 py-10 md:py-12">
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+        <div className="mb-12 text-center md:text-left">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-foreground to-primary/70 bg-clip-text text-transparent leading-tight">
             Catálogo de Productos
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl">
             Descubre nuestra amplia selección de productos para tu salud y bienestar
           </p>
         </div>
 
         {/* Filters */}
-        <div className="mb-8 space-y-4 bg-card/50 backdrop-blur-sm rounded-xl border border-border/50 p-6 shadow-sm">
+        <div className="mb-10 space-y-4 bg-card/80 backdrop-blur-md rounded-2xl border border-border/60 p-6 md:p-8 shadow-lg hover:shadow-xl transition-shadow duration-300">
           <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5 z-10"/>
-              <Input type="text" placeholder="Buscar productos por nombre..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-11 h-11 border-border/50 focus:border-primary transition-colors"/>
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5 z-10 pointer-events-none"/>
+              <Input type="text" placeholder="Buscar productos por nombre..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-11 h-12 border-border/60 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 bg-background/50"/>
             </div>
-            <Button type="submit" size="lg" className="font-semibold shadow-md hover:shadow-lg transition-all duration-300 whitespace-nowrap">
+            <Button type="submit" size="lg" className="h-12 px-8 font-semibold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 whitespace-nowrap">
               <Search className="mr-2 h-4 w-4"/>
               Buscar
             </Button>
           </form>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center pt-2">
+            <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
               <Filter className="h-4 w-4"/>
               Filtrar por:
             </div>
             <Select value={categoryId || 'all'} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="w-full sm:w-[240px] border-border/50 focus:border-primary transition-colors">
+              <SelectTrigger className="w-full sm:w-[260px] h-11 border-border/60 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200 bg-background/50 font-medium">
                 <SelectValue placeholder="Categoría"/>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all" className="font-medium">Todas las categorías</SelectItem>
-                {categories.map((cat) => (<SelectItem key={cat.id} value={cat.id}>
+                <SelectItem value="all" className="font-semibold">✨ Todas las categorías</SelectItem>
+                {categories.map((cat) => (<SelectItem key={cat.id} value={cat.id} className="font-medium">
                     {cat.name}
                   </SelectItem>))}
               </SelectContent>
@@ -129,13 +129,13 @@ const Catalog = () => {
         </div>
 
         {/* Error State */}
-        {error && (<Alert variant="destructive" className="mb-8 shadow-lg border-2">
+        {error && (<Alert variant="destructive" className="mb-10 shadow-xl border-2 rounded-xl">
             <AlertCircle className="h-5 w-5"/>
             <AlertTitle className="font-bold text-lg">{error.title}</AlertTitle>
             <AlertDescription className="mt-2 space-y-3">
               <p className="text-sm">{error.message}</p>
               {error.code && (<p className="text-xs opacity-75">Código de error: {error.code}</p>)}
-              <Button variant="outline" size="sm" onClick={fetchProducts} className="mt-2 font-semibold">
+              <Button variant="outline" size="sm" onClick={fetchProducts} className="mt-2 font-semibold hover:scale-105 transition-transform duration-200">
                 <RefreshCw className="mr-2 h-4 w-4"/>
                 Reintentar
               </Button>
@@ -143,23 +143,23 @@ const Catalog = () => {
           </Alert>)}
 
         {/* Products Grid */}
-        {loading ? (<div className="py-20">
+        {loading ? (<div className="py-24">
             <Loader />
           </div>) : products.length > 0 ? (<>
-            <div className="mb-4 flex items-center justify-between">
-              <p className="text-sm text-muted-foreground font-medium">
+            <div className="mb-6 flex items-center justify-between px-1">
+              <p className="text-sm md:text-base text-muted-foreground font-semibold">
                 {products.length} producto{products.length !== 1 ? 's' : ''} encontrado{products.length !== 1 ? 's' : ''}
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
               {products.map((product) => (<ProductCard key={product.id} {...product}/>))}
             </div>
-          </>) : !error && (<div className="flex flex-col items-center justify-center py-20 px-4">
-            <div className="w-20 h-20 rounded-full bg-secondary flex items-center justify-center mb-6 shadow-lg">
-              <Package className="h-10 w-10 text-muted-foreground"/>
+          </>) : !error && (<div className="flex flex-col items-center justify-center py-24 px-4">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-secondary to-secondary/50 flex items-center justify-center mb-6 shadow-xl">
+              <Package className="h-12 w-12 text-muted-foreground"/>
             </div>
-            <h3 className="text-2xl font-bold text-foreground mb-2">No se encontraron productos</h3>
-            <p className="text-muted-foreground text-center max-w-md mb-6">
+            <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-3">No se encontraron productos</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-8 text-sm md:text-base">
               {searchQuery || categoryId
                 ? 'Intenta ajustar tus filtros de búsqueda o explorar otras categorías'
                 : 'Actualmente no hay productos disponibles en el catálogo'}
@@ -167,7 +167,7 @@ const Catalog = () => {
             {(searchQuery || categoryId) && (<Button variant="outline" onClick={() => {
                 setSearchQuery('');
                 setSearchParams({});
-              }} className="font-semibold">
+              }} className="font-semibold hover:scale-105 transition-transform duration-200">
                 Limpiar filtros
               </Button>)}
           </div>)}

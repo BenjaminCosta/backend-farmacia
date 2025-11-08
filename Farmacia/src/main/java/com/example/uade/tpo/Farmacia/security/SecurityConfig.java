@@ -48,6 +48,10 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                     
+                    // Imágenes de productos: acceso público (con caching)
+                    .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/api/v1/products/*/images").permitAll()
+                    
                     // Rutas de ADMIN: solo acceso con rol ADMIN
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                     

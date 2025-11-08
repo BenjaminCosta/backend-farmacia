@@ -7,16 +7,23 @@ import { useCart } from '@/context/CartContext';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
 import apiClient from '@/lib/axios';
+import ProductImageGallery from '@/components/ProductImageGallery';
+
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { addItem } = useCart();
     const [product, setProduct] = useState(null);
+    const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingImages, setLoadingImages] = useState(true);
     const [quantity, setQuantity] = useState(1);
+    
     useEffect(() => {
         fetchProduct();
+        fetchImages();
     }, [id]);
+    
     const fetchProduct = async () => {
         try {
             const response = await apiClient.get(`/products/${id}`);
@@ -35,6 +42,18 @@ const ProductDetail = () => {
         }
         finally {
             setLoading(false);
+        }
+    };
+
+    const fetchImages = async () => {
+        try {
+            setLoadingImages(true);
+            const response = await apiClient.get(`/products/${id}/images`);
+            setImages(response.data);
+        } catch (error) {
+            console.error('Error cargando imágenes:', error);
+        } finally {
+            setLoadingImages(false);
         }
     };
     const handleAddToCart = () => {
@@ -73,11 +92,15 @@ const ProductDetail = () => {
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Image */}
-          <div className="aspect-square bg-secondary rounded-lg overflow-hidden">
-            {product.image ? (<img src={product.image} alt={product.name} className="w-full h-full object-cover"/>) : (<div className="w-full h-full flex items-center justify-center">
-                <span className="text-muted-foreground">Sin imagen disponible</span>
-              </div>)}
+          {/* Image Gallery */}
+          <div className="sticky top-4 h-fit">
+            {loadingImages ? (
+              <div className="aspect-square bg-secondary rounded-lg flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+              <ProductImageGallery productId={id} images={images} />
+            )}
           </div>
 
           {/* Details */}
