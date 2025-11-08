@@ -66,6 +66,9 @@ public class SecurityConfig {
                     .requestMatchers("/api/v1/cart/**").authenticated()
                     .requestMatchers("/api/v1/orders/**").authenticated()
                     
+                    // Payments requieren autenticación
+                    .requestMatchers("/api/v1/payments/**").authenticated()
+                    
                     // Todo lo demás requiere autenticación
                     .anyRequest().authenticated()
             )

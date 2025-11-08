@@ -16,12 +16,21 @@ apiClient.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 // Response interceptor for error handling
-apiClient.interceptors.response.use((response) => response, (error) => {
-    if (error.response?.status === 401) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
+apiClient.interceptors.response.use(
+    (response) => response, 
+    (error) => {
+        // Solo redirigir a /login en 401 si NO es un error de pago/stripe
+        if (error.response?.status === 401) {
+            const url = error.config?.url || '';
+            // No redirigir si es un endpoint de pagos
+            if (!url.includes('/payments/') && !url.includes('/orders')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+            }
+        }
+        return Promise.reject(error);
     }
-    return Promise.reject(error);
-});
+);
+
 export default apiClient;

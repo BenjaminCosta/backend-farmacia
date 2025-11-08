@@ -13,7 +13,9 @@ import java.util.*;
 @Table(name = "orders")
 public class Order {
 
-  public enum Status { PENDING, PROCESSING, COMPLETED, CANCELLED }
+  public enum Status { PENDING, PROCESSING, COMPLETED, CANCELLED, CONFIRMED }
+  public enum PaymentStatus { PENDING, PAID, FAILED, REFUNDED }
+  public enum ShippingStatus { PENDING_SHIPMENT, SHIPPED, IN_TRANSIT, DELIVERED, RETURNED }
 
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -29,8 +31,22 @@ public class Order {
   @Column(name = "status", length = 20, nullable = false)
   private Status status = Status.PENDING;
 
+  @Enumerated(EnumType.STRING)
+  @Column(name = "payment_status", length = 20, nullable = false)
+  private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "shipping_status", length = 30)
+  private ShippingStatus shippingStatus;
+
   @Column(nullable = false)
   private Instant createdAt = Instant.now();
+
+  @Column(name = "paid_at")
+  private Instant paidAt;
+
+  @Column(name = "total_paid", precision = 12, scale = 2)
+  private BigDecimal totalPaid;
 
   // Delivery information
   @Column(name = "full_name")

@@ -16,6 +16,7 @@ import Catalog from "./pages/Catalog";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import Login from "./pages/Login";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
@@ -56,7 +57,10 @@ const App = () => (<QueryClientProvider client={queryClient}>
                           <Profile />
                         </ProtectedRoute>}/>
                     <Route path="/checkout" element={<ProtectedRoute>
-                          <Checkout />
+                            <Checkout />
+                        </ProtectedRoute>}/>
+                    <Route path="/payment-success" element={<ProtectedRoute>
+                            <PaymentSuccess />
                         </ProtectedRoute>}/>
                     <Route path="/orders" element={<ProtectedRoute>
                           <Orders />
