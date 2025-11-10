@@ -35,6 +35,7 @@ const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState(null);
     const [createdOrderId, setCreatedOrderId] = useState(null);
+    const [productDetails, setProductDetails] = useState({}); // 🔴 Para obtener requiresPrescription
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -45,6 +46,39 @@ const Checkout = () => {
         deliveryMethod: 'delivery',
         paymentMethod: 'cash',
     });
+
+    // 🔴 Detectar si el carrito contiene productos RX
+    const hasRxProduct = Object.values(productDetails).some(p => p?.requiresPrescription === true);
+
+    // 🔴 Cargar detalles de productos para verificar requiresPrescription
+    useEffect(() => {
+        const fetchProductDetails = async () => {
+            try {
+                const details = {};
+                for (const item of items) {
+                    const response = await client.get(`/api/v1/products/${item.productId}`);
+                    details[item.productId] = response.data;
+                }
+                setProductDetails(details);
+                
+                // Si hay productos RX, forzar PICKUP
+                const hasRx = Object.values(details).some(p => p?.requiresPrescription === true);
+                if (hasRx && formData.deliveryMethod === 'delivery') {
+                    setFormData(prev => ({ ...prev, deliveryMethod: 'pickup' }));
+                    toast.warning('Este pedido contiene medicamentos con receta. Solo se permite retiro en farmacia.', {
+                        duration: 5000
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando detalles de productos:', error);
+            }
+        };
+        
+        if (items.length > 0) {
+            fetchProductDetails();
+        }
+    }, [items]);
+
 
     // Calcular monto total a pagar (única fuente de verdad)
     // Para pruebas con Stripe en USD, dividimos por 1000 (conversión aproximada ARS->USD)
@@ -300,19 +334,87 @@ const Checkout = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Método de Entrega</CardTitle>
+                  {/* 🔴 Banner de advertencia RX - DISEÑO MEJORADO */}
+                  {hasRxProduct && (
+                    <div className="mt-4 relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-600 to-red-700 opacity-10 animate-pulse"></div>
+                      <div className="relative bg-gradient-to-r from-red-50 to-red-100 border-2 border-red-500 rounded-xl p-4 shadow-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shadow-md">
+                            <span className="text-white text-xl font-bold">⚕</span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-red-900 font-bold text-base mb-1 flex items-center gap-2">
+                              Medicamento bajo receta médica
+                            </h4>
+                            <p className="text-red-800 text-sm leading-relaxed">
+                              Este pedido contiene productos que <strong>requieren receta médica</strong>. 
+                              Por normativa sanitaria, solo puede retirarse en nuestra farmacia presentando la prescripción.
+                            </p>
+                            <div className="mt-3 bg-white/70 rounded-lg p-2 text-xs text-red-700 font-medium">
+                              🏥 Deberá presentar su receta médica válida al momento del retiro
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardHeader>
                 <CardContent>
                   <RadioGroup value={formData.deliveryMethod} onValueChange={(value) => setFormData({ ...formData, deliveryMethod: value })}>
-                    <div className="flex items-center space-x-2 mb-3">
-                      <RadioGroupItem value="delivery" id="delivery"/>
-                      <Label htmlFor="delivery" className="cursor-pointer">
-                        Envío a domicilio (Gratis)
+                    <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 mb-3 ${
+                      hasRxProduct 
+                        ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-300' 
+                        : formData.deliveryMethod === 'delivery'
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/50 hover:bg-primary/5'
+                    }`}>
+                      <RadioGroupItem 
+                        value="delivery" 
+                        id="delivery" 
+                        disabled={hasRxProduct}
+                        className={hasRxProduct ? 'cursor-not-allowed' : ''}
+                      />
+                      <Label 
+                        htmlFor="delivery" 
+                        className={`flex-1 cursor-pointer font-medium ${hasRxProduct ? 'cursor-not-allowed' : ''}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">🚚</span>
+                          <div>
+                            <div className="font-semibold">Envío a domicilio</div>
+                            <div className="text-xs text-muted-foreground">Gratis - 3-5 días hábiles</div>
+                          </div>
+                        </div>
+                        {hasRxProduct && (
+                          <span className="mt-2 text-xs text-red-600 font-bold bg-red-100 px-2 py-1 rounded inline-block">
+                            ❌ No disponible para productos con receta
+                          </span>
+                        )}
                       </Label>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    
+                    <div className={`flex items-center space-x-3 p-4 rounded-lg border-2 transition-all duration-200 ${
+                      formData.deliveryMethod === 'pickup'
+                        ? hasRxProduct
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50 hover:bg-primary/5'
+                    }`}>
                       <RadioGroupItem value="pickup" id="pickup"/>
-                      <Label htmlFor="pickup" className="cursor-pointer">
-                        Retiro en farmacia
+                      <Label htmlFor="pickup" className="flex-1 cursor-pointer font-medium">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">🏪</span>
+                          <div>
+                            <div className="font-semibold">Retiro en farmacia</div>
+                            <div className="text-xs text-muted-foreground">Gratis - Retiro inmediato</div>
+                          </div>
+                        </div>
+                        {hasRxProduct && (
+                          <span className="mt-2 text-xs text-green-700 font-bold bg-green-100 px-2 py-1 rounded inline-block">
+                            ✓ Método requerido para productos RX
+                          </span>
+                        )}
                       </Label>
                     </div>
                   </RadioGroup>
@@ -396,12 +498,30 @@ const Checkout = () => {
                 <CardTitle>Resumen del Pedido</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {items.map((item) => (<div key={item.productId} className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">
-                      {item.name} x{item.quantity}
-                    </span>
-                    <span>{formatPrice(item.price * item.quantity)}</span>
-                  </div>))}
+                {items.map((item) => {
+                  const itemDetails = productDetails[item.productId];
+                  const isRx = itemDetails?.requiresPrescription === true;
+                  
+                  return (
+                    <div key={item.productId} className="flex justify-between text-sm items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground font-medium">
+                            {item.name} x{item.quantity}
+                          </span>
+                          {/* 🔴 Badge RX en el resumen */}
+                          {isRx && (
+                            <span className="px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded flex items-center gap-1">
+                              ⚕ RX
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <span className="font-semibold">{formatPrice(item.price * item.quantity)}</span>
+                    </div>
+                  );
+                })}
+                
                 <div className="border-t pt-4">
                   <div className="flex justify-between mb-2">
                     <span className="text-muted-foreground">Subtotal</span>

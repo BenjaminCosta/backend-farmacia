@@ -9,6 +9,7 @@ public class CreateProductRequest {
     private Double precio;
     private Integer stock;
     private Double descuento;
+    private Boolean requiresPrescription = false; // Default: venta libre
     private CategoryRef category;
     
     @Data

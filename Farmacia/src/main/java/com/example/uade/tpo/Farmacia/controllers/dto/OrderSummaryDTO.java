@@ -12,7 +12,8 @@ public record OrderSummaryDTO(
     Instant createdAt,
     List<OrderItemSummary> items,
     DeliveryInfo delivery,
-    PaymentInfo payment
+    PaymentInfo payment,
+    Boolean requiresPrescription  // 🔴 TRUE si contiene al menos un producto RX
 ) {
     // Items con información completa del producto
     public record OrderItemSummary(

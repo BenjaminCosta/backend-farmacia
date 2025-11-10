@@ -8,6 +8,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import CookieBanner from "./components/CookieBanner";
+import FloatingChatButton from "./components/FloatingChatButton";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Catalog from "./pages/Catalog";
@@ -75,6 +76,7 @@ const App = () => (<QueryClientProvider client={queryClient}>
             </main>
             <Footer />
             <CookieBanner />
+            <FloatingChatButton />
           </div>
         </BrowserRouter>
       </TooltipProvider>

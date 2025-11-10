@@ -202,4 +202,41 @@ public class OrderController {
       throw e;
     }
   }
+
+  /**
+   * 🔴 PUT /api/v1/orders/{id}/pickup/complete - Marcar pickup completado (Farmacéutico/Admin)
+   * Endpoint específico para cuando el cliente recoge su pedido con receta en la farmacia.
+   * Valida que sea método PICKUP y marca la orden como COMPLETED.
+   * Retorna 200 OK con OrderSummaryDTO actualizado
+   * Retorna 400 Bad Request si no es método PICKUP o estado inválido
+   * Retorna 404 Not Found si la orden no existe
+   */
+  @PutMapping("/{id}/pickup/complete")
+  @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
+  public ResponseEntity<OrderSummaryDTO> markPickupComplete(
+      @PathVariable Long id,
+      Authentication auth) {
+    
+    String userEmail = auth.getName();
+    log.info("🏪 PUT /api/v1/orders/{}/pickup/complete - Farmacéutico: {}", id, userEmail);
+    
+    try {
+      OrderSummaryDTO completedOrder = service.markPickupComplete(id);
+      
+      log.info("✅ Pickup completado - Orden: {}, RX: {}, Farmacéutico: {}", 
+               id, completedOrder.requiresPrescription(), userEmail);
+      
+      return ResponseEntity.ok(completedOrder);
+      
+    } catch (IllegalArgumentException | IllegalStateException e) {
+      log.error("❌ Error de validación al completar pickup - Orden: {}, Error: {}", 
+                id, e.getMessage());
+      throw e;
+    } catch (Exception e) {
+      log.error("❌ Error inesperado al completar pickup - Orden: {}, Error: {}", 
+                id, e.getMessage(), e);
+      throw e;
+    }
+  }
 }
+

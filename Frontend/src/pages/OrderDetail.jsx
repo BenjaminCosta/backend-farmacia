@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
+import OrderTimeline from '@/components/OrderTimeline';
 import client from '@/api/client';
 
 const OrderDetail = () => {
@@ -121,6 +122,11 @@ const OrderDetail = () => {
             </p>
           </div>
           <Badge className={getStatusColor(order.status)}>{getStatusText(order.status)}</Badge>
+        </div>
+
+        {/* Order Timeline */}
+        <div className="mb-8">
+          <OrderTimeline status={order.status} deliveryMethod={order.deliveryMethod} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

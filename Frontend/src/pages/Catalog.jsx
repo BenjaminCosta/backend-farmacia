@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, AlertCircle, Package, RefreshCw, Filter } from 'lucide-react';
+import { Search, AlertCircle, Package, RefreshCw, Filter, Pill, ShoppingBag } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductCard from '@/components/ProductCard';
 import Loader from '@/components/Loader';
 import client from '@/api/client';
 import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
+
 const Catalog = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
@@ -16,15 +19,18 @@ const Catalog = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+    const [rxFilter, setRxFilter] = useState(searchParams.get('rx') || 'all'); // 🔴 Nuevo: filtro RX
+    
     const categoryId = searchParams.get('categoryId');
     const page = parseInt(searchParams.get('page') || '0');
     const size = parseInt(searchParams.get('size') || '12');
     useEffect(() => {
         fetchCategories();
     }, []);
+    
     useEffect(() => {
         fetchProducts();
-    }, [categoryId, searchQuery, page, size]);
+    }, [categoryId, searchQuery, page, size, rxFilter]); // 🔴 Agregar rxFilter a dependencias
     const fetchCategories = async () => {
         try {
             const response = await client.get('/api/v1/categories');
@@ -43,8 +49,15 @@ const Catalog = () => {
                 params.append('categoryId', categoryId);
             if (searchQuery)
                 params.append('q', searchQuery);
+            // 🔴 Agregar filtro RX al backend
+            if (rxFilter === 'rx') {
+                params.append('rx', 'true');
+            } else if (rxFilter === 'otc') {
+                params.append('rx', 'false');
+            }
             params.append('page', page.toString());
             params.append('size', size.toString());
+            
             const response = await client.get(`/api/v1/products?${params.toString()}`);
             setProducts(normalizeProducts(response.data));
         }
@@ -84,6 +97,20 @@ const Catalog = () => {
         params.set('page', '0');
         setSearchParams(params);
     };
+    
+    // 🔴 Nuevo handler para filtro RX
+    const handleRxFilterChange = (value) => {
+        setRxFilter(value);
+        const params = new URLSearchParams(searchParams);
+        if (value === 'all') {
+            params.delete('rx');
+        } else {
+            params.set('rx', value);
+        }
+        params.set('page', '0');
+        setSearchParams(params);
+    };
+    
     return (<div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/10">
       <div className="container mx-auto px-4 py-10 md:py-12">
         {/* Header */}
@@ -125,6 +152,59 @@ const Catalog = () => {
                   </SelectItem>))}
               </SelectContent>
             </Select>
+          </div>
+          
+          {/* 🔴 NUEVO: Filtro RX/OTC Moderno con Tabs */}
+          <div className="pt-4 border-t border-border/40">
+            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+              <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                <Pill className="h-4 w-4"/>
+                Tipo de Producto:
+              </div>
+              <Tabs value={rxFilter} onValueChange={handleRxFilterChange} className="w-full sm:w-auto">
+                <TabsList className="grid w-full sm:w-auto grid-cols-3 h-11 bg-secondary/50 p-1">
+                  <TabsTrigger 
+                    value="all" 
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground font-semibold px-6 transition-all duration-200"
+                  >
+                    <Package className="mr-2 h-4 w-4" />
+                    Todos
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="otc" 
+                    className="data-[state=active]:bg-green-600 data-[state=active]:text-white font-semibold px-6 transition-all duration-200"
+                  >
+                    <ShoppingBag className="mr-2 h-4 w-4" />
+                    Venta Libre
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="rx" 
+                    className="data-[state=active]:bg-red-600 data-[state=active]:text-white font-semibold px-6 transition-all duration-200"
+                  >
+                    <Pill className="mr-2 h-4 w-4" />
+                    Bajo Receta
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
+            
+            {/* Info badge según filtro activo */}
+            {rxFilter === 'rx' && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+                <Pill className="h-4 w-4" />
+                <span className="font-medium">
+                  Mostrando solo medicamentos <strong>bajo receta médica (RX)</strong>. Requieren retiro en farmacia.
+                </span>
+              </div>
+            )}
+            {rxFilter === 'otc' && (
+              <div className="mt-3 flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-2.5">
+                <ShoppingBag className="h-4 w-4" />
+                <span className="font-medium">
+                  Mostrando productos de <strong>venta libre (OTC)</strong>. Disponibles para envío a domicilio.
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

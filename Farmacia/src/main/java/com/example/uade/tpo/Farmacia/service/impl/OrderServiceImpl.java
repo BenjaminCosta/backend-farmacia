@@ -72,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
     
     // 3. Validar y calcular total
     BigDecimal total = BigDecimal.ZERO;
+    boolean hasRxProduct = false; // 🔴 Flag para detectar productos con receta
     
     for (CreateOrderRequest.OrderItemRequest item : request.getItems()) {
       if (item.getProductId() == null) {
@@ -98,10 +99,33 @@ public class OrderServiceImpl implements OrderService {
         );
       }
       
+      // 🔴 Detectar si el producto requiere receta
+      if (product.getRequiresPrescription() != null && product.getRequiresPrescription()) {
+        hasRxProduct = true;
+        log.info("💊 Producto con receta detectado: {} - ID: {}", product.getNombre(), product.getId());
+      }
+      
       // Calcular subtotal
       BigDecimal unitPrice = product.getPrecio() != null ? product.getPrecio() : BigDecimal.ZERO;
       BigDecimal lineTotal = unitPrice.multiply(BigDecimal.valueOf(item.getQuantity()));
       total = total.add(lineTotal);
+    }
+    
+    // 3.5. 🔴 VALIDACIÓN RX: Si hay productos con receta, FORZAR método PICKUP
+    if (hasRxProduct) {
+      String deliveryMethod = request.getDeliveryMethod() != null ? 
+          request.getDeliveryMethod().toUpperCase() : "";
+      
+      if (!"PICKUP".equals(deliveryMethod)) {
+        log.error("❌ Intento de DELIVERY con productos RX - Usuario: {}, Método: {}", 
+                  email, deliveryMethod);
+        throw new BadRequestException(
+            "Este pedido contiene medicamentos con receta (RX) que solo pueden retirarse en la farmacia. " +
+            "Por favor, seleccione el método de entrega 'PICKUP' (Retiro en local)."
+        );
+      }
+      
+      log.info("✅ Validación RX pasada - Método PICKUP confirmado para usuario: {}", email);
     }
     
     // 4. Crear la orden con datos de delivery
@@ -267,6 +291,66 @@ public class OrderServiceImpl implements OrderService {
     return toOrderSummaryDTO(updatedOrder);
   }
 
+  @Override
+  public OrderSummaryDTO markPickupComplete(Long orderId) {
+    log.info("🏪 Farmacéutico marcando pickup completado - Orden: {}", orderId);
+    
+    // 1. Buscar la orden
+    Order order = orders.findById(orderId)
+        .orElseThrow(() -> {
+          log.error("❌ Orden {} no encontrada", orderId);
+          return new NotFoundException("Orden no encontrada con ID: " + orderId);
+        });
+    
+    // 2. Validar que el método de entrega es PICKUP
+    if (!"PICKUP".equalsIgnoreCase(order.getDeliveryMethod())) {
+      log.error("❌ Intento de marcar pickup en orden con método: {} - Orden: {}", 
+                order.getDeliveryMethod(), orderId);
+      throw new BadRequestException(
+          "Solo las órdenes con método de entrega PICKUP pueden marcarse como recogidas. " +
+          "Esta orden usa: " + order.getDeliveryMethod()
+      );
+    }
+    
+    // 3. Validar que la orden contiene productos RX (opcional pero recomendado)
+    boolean hasRxProduct = order.getItems().stream()
+        .anyMatch(item -> {
+          Product product = item.getProduct();
+          return product.getRequiresPrescription() != null && product.getRequiresPrescription();
+        });
+    
+    if (!hasRxProduct) {
+      log.warn("⚠️ Orden {} no contiene productos RX pero se marca pickup completo", orderId);
+    }
+    
+    // 4. Validar estado actual (solo PENDING o PROCESSING pueden completarse)
+    if (order.getStatus() == Order.Status.COMPLETED) {
+      log.warn("⚠️ Orden {} ya está COMPLETED", orderId);
+      throw new BadRequestException("La orden ya está completada");
+    }
+    
+    if (order.getStatus() == Order.Status.CANCELLED) {
+      log.error("❌ Intento de completar orden cancelada: {}", orderId);
+      throw new BadRequestException("No se puede completar una orden cancelada");
+    }
+    
+    // 5. Marcar como COMPLETED
+    order.setStatus(Order.Status.COMPLETED);
+    
+    // 6. Si el pago era PENDING y es CASH, marcarlo como PAID
+    if (order.getPaymentStatus() == Order.PaymentStatus.PENDING && 
+        "CASH".equalsIgnoreCase(order.getPaymentMethod())) {
+      order.setPaymentStatus(Order.PaymentStatus.PAID);
+      log.info("💰 Pago en efectivo marcado como PAID - Orden: {}", orderId);
+    }
+    
+    Order completedOrder = orders.save(order);
+    
+    log.info("✅ Pickup completado exitosamente - Orden: {}, RX: {}", orderId, hasRxProduct);
+    
+    return toOrderSummaryDTO(completedOrder);
+  }
+
   // ================= Helpers =================
 
   // Validar transiciones de estado permitidas
@@ -308,6 +392,13 @@ public class OrderServiceImpl implements OrderService {
 
   // Mapear Order a OrderSummaryDTO
   private OrderSummaryDTO toOrderSummaryDTO(Order order) {
+    // 🔴 Detectar si la orden contiene productos con receta
+    boolean hasRxProduct = order.getItems().stream()
+        .anyMatch(item -> {
+          Product product = item.getProduct();
+          return product.getRequiresPrescription() != null && product.getRequiresPrescription();
+        });
+    
     // Mapear items
     List<OrderSummaryDTO.OrderItemSummary> items = order.getItems()
         .stream()
@@ -344,7 +435,8 @@ public class OrderServiceImpl implements OrderService {
         order.getCreatedAt(),
         items,
         delivery,
-        payment
+        payment,
+        hasRxProduct  // 🔴 Nuevo campo
     );
   }
 

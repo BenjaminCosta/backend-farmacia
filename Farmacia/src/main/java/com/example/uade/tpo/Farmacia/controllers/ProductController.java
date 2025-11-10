@@ -24,10 +24,11 @@ public class ProductController {
   @GetMapping
   public ResponseEntity<List<ProductDTO>> list(@RequestParam(required = false) Long categoryId,
                                                 @RequestParam(required = false) String q,
-                                                @RequestParam(required = false) Boolean inStock) {
+                                                @RequestParam(required = false) Boolean inStock,
+                                                @RequestParam(required = false) Boolean rx) {
     try {
-      log.info("GET /products - categoryId: {}, q: '{}', inStock: {}", categoryId, q, inStock);
-      List<Product> products = service.list(categoryId, q, inStock);
+      log.info("GET /products - categoryId: {}, q: '{}', inStock: {}, rx: {}", categoryId, q, inStock, rx);
+      List<Product> products = service.list(categoryId, q, inStock, rx);
       
       // Mapear a DTOs
       List<ProductDTO> productDTOs = products.stream()
@@ -122,6 +123,7 @@ public class ProductController {
         product.getPrecio() != null ? product.getPrecio().doubleValue() : 0.0, // price
         product.getStock(), // stock
         product.getDescuento() != null ? product.getDescuento().doubleValue() : 0.0, // discount
+        product.getRequiresPrescription() != null ? product.getRequiresPrescription() : false, // requiresPrescription
         product.getCategory() != null ? product.getCategory().getId() : null, // categoryId
         product.getCategory() != null ? product.getCategory().getName() : null // categoryName
     );

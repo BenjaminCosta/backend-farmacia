@@ -24,9 +24,9 @@ public class ProductService {
   private final CategoryRepository categories;
   private final OrderItemRepository orderItems;
 
-  public List<Product> list(Long categoryId, String q, Boolean inStock) {
-    log.debug("Listing products with filters - categoryId: {}, query: '{}', inStock: {}", 
-              categoryId, q, inStock);
+  public List<Product> list(Long categoryId, String q, Boolean inStock, Boolean rx) {
+    log.debug("Listing products with filters - categoryId: {}, query: '{}', inStock: {}, rx: {}", 
+              categoryId, q, inStock, rx);
     
     List<Product> base;
     
@@ -46,6 +46,13 @@ public class ProductService {
         int originalSize = base.size();
         base = base.stream().filter(p -> p.getStock() != null && p.getStock() > 0).toList();
         log.debug("Filtered by stock: {} -> {} products", originalSize, base.size());
+      }
+      
+      // Filtro por receta médica
+      if (rx != null) {
+        int originalSize = base.size();
+        base = base.stream().filter(p -> rx.equals(p.getRequiresPrescription())).toList();
+        log.debug("Filtered by requiresPrescription={}: {} -> {} products", rx, originalSize, base.size());
       }
       
       log.info("Returning {} products", base.size());
@@ -102,6 +109,7 @@ public class ProductService {
       product.setPrecio(BigDecimal.valueOf(request.getPrecio()));
       product.setStock(request.getStock());
       product.setDescuento(request.getDescuento() != null ? BigDecimal.valueOf(request.getDescuento()) : BigDecimal.ZERO);
+      product.setRequiresPrescription(request.getRequiresPrescription() != null ? request.getRequiresPrescription() : false);
       product.setCategory(category);
       
       Product saved = repo.save(product);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Package, ShoppingCart, TrendingUp, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, ShoppingCart, TrendingUp, AlertCircle, CheckCircle, Pill, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '@/components/ui/table';
@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
@@ -44,6 +45,7 @@ const PharmacistDashboard = () => {
         stock: '',
         descuento: '',
         categoryId: '',
+        requiresPrescription: false,
     });
     // Estados para modales de categorías
     const [createCategoryModalOpen, setCreateCategoryModalOpen] = useState(false);
@@ -154,6 +156,29 @@ const PharmacistDashboard = () => {
             toast.error('Error al actualizar estado del pedido');
         }
     };
+    
+    // 🔴 Nuevo handler para marcar pickup completado (productos RX)
+    const handleMarkPickupComplete = async (orderId) => {
+        try {
+            const response = await client.put(`/api/v1/orders/${orderId}/pickup/complete`);
+            const completedOrder = response.data;
+            
+            // Actualizar la orden localmente
+            setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'COMPLETED' } : o));
+            
+            toast.success(
+                completedOrder.requiresPrescription 
+                    ? '✅ Entrega RX completada: medicamento entregado al cliente'
+                    : '✅ Retiro completado exitosamente'
+            );
+            
+            fetchData(); // Refrescar datos
+        } catch (error) {
+            console.error('Error al completar pickup:', error);
+            toast.error(error.response?.data?.message || 'Error al completar el retiro');
+        }
+    };
+    
     const handleOpenCreateProductModal = () => {
         setProductForm({
             nombre: '',
@@ -162,6 +187,7 @@ const PharmacistDashboard = () => {
             stock: '',
             descuento: '',
             categoryId: '',
+            requiresPrescription: false,
         });
         setNewlyCreatedProductId(null);
         setCreateProductModalOpen(true);
@@ -175,6 +201,7 @@ const PharmacistDashboard = () => {
             stock: (product.stock || 0).toString(),
             descuento: '0', // Si tienes descuento en el Product, úsalo aquí
             categoryId: product.categoryId || product.category?.id || '',
+            requiresPrescription: product.requiresPrescription || false,
         });
         setEditProductModalOpen(true);
     };
@@ -191,6 +218,7 @@ const PharmacistDashboard = () => {
                 precio: Number(productForm.precio),
                 stock: Number(productForm.stock) || 0,
                 descuento: Number(productForm.descuento) || 0,
+                requiresPrescription: productForm.requiresPrescription,
                 category: {
                     id: Number(productForm.categoryId),
                 },
@@ -224,6 +252,7 @@ const PharmacistDashboard = () => {
                 precio: Number(productForm.precio),
                 stock: Number(productForm.stock) || 0,
                 descuento: Number(productForm.descuento) || 0,
+                requiresPrescription: productForm.requiresPrescription,
                 category: {
                     id: Number(productForm.categoryId),
                 },
@@ -331,7 +360,7 @@ const PharmacistDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Productos</CardTitle>
@@ -362,6 +391,22 @@ const PharmacistDashboard = () => {
             <CardContent>
               <div className="text-2xl font-bold">{stats.pendingOrders}</div>
               <p className="text-xs text-muted-foreground">Requieren atención</p>
+            </CardContent>
+          </Card>
+          
+          {/* 🔴 NUEVA: Tarjeta de Pedidos RX */}
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-red-900">Pedidos RX</CardTitle>
+              <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
+                <Pill className="h-4 w-4 text-white"/>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-900">
+                {orders.filter(o => o.deliveryMethod === 'PICKUP' && o.status !== 'COMPLETED' && o.status !== 'CANCELLED').length}
+              </div>
+              <p className="text-xs text-red-700 font-medium">Para retiro en farmacia</p>
             </CardContent>
           </Card>
 
@@ -494,26 +539,58 @@ const PharmacistDashboard = () => {
                       <TableHead>ID Pedido</TableHead>
                       <TableHead>Fecha</TableHead>
                       <TableHead>Total</TableHead>
+                      <TableHead>Método</TableHead>
                       <TableHead>Estado</TableHead>
                       <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {orders.map((order) => (<TableRow key={order.id}>
-                        <TableCell className="font-medium">#{order.id}</TableCell>
+                    {orders.map((order) => (<TableRow key={order.id} className={order.deliveryMethod === 'PICKUP' ? 'bg-blue-50' : ''}>
+                        <TableCell className="font-medium">
+                          #{order.id}
+                          {/* 🔴 Badge RX si el pedido contiene productos con receta */}
+                          {order.requiresPrescription && (
+                            <span className="ml-2 px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded">
+                              RX
+                            </span>
+                          )}
+                        </TableCell>
                         <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
                         <TableCell>{formatPrice(order.total)}</TableCell>
+                        <TableCell>
+                          <Badge variant={order.deliveryMethod === 'PICKUP' ? 'default' : 'secondary'}>
+                            {order.deliveryMethod === 'PICKUP' ? '🏪 Retiro' : '🚚 Envío'}
+                          </Badge>
+                        </TableCell>
                         <TableCell>{getStatusBadge(order.status)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            {order.status === 'PENDING' && (<Button variant="outline" size="sm" onClick={() => handleUpdateOrderStatus(order.id, 'PROCESSING')}>
+                            {/* Botón PICKUP para órdenes con método PICKUP */}
+                            {order.deliveryMethod === 'PICKUP' && order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
+                              <Button 
+                                variant={order.requiresPrescription ? 'default' : 'outline'}
+                                className={order.requiresPrescription ? 'bg-red-600 hover:bg-red-700' : ''}
+                                size="sm" 
+                                onClick={() => handleMarkPickupComplete(order.id)}
+                              >
+                                <CheckCircle className="mr-1 h-3 w-3"/>
+                                {order.requiresPrescription ? '⚕️ Entregar RX' : 'Entregar'}
+                              </Button>
+                            )}
+                            
+                            {/* Botones de flujo normal para otros métodos */}
+                            {order.deliveryMethod !== 'PICKUP' && order.status === 'PENDING' && (
+                              <Button variant="outline" size="sm" onClick={() => handleUpdateOrderStatus(order.id, 'PROCESSING')}>
                                 <CheckCircle className="mr-1 h-3 w-3"/>
                                 Procesar
-                              </Button>)}
-                            {order.status === 'PROCESSING' && (<Button variant="outline" size="sm" onClick={() => handleUpdateOrderStatus(order.id, 'COMPLETED')}>
+                              </Button>
+                            )}
+                            {order.deliveryMethod !== 'PICKUP' && order.status === 'PROCESSING' && (
+                              <Button variant="outline" size="sm" onClick={() => handleUpdateOrderStatus(order.id, 'COMPLETED')}>
                                 <CheckCircle className="mr-1 h-3 w-3"/>
                                 Completar
-                              </Button>)}
+                              </Button>
+                            )}
                           </div>
                         </TableCell>
                       </TableRow>))}
@@ -633,6 +710,54 @@ const PharmacistDashboard = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {/* Selector de Receta */}
+                <div className="space-y-3 pt-2">
+                  <Label className="text-base font-semibold">Tipo de Venta *</Label>
+                  <RadioGroup 
+                    value={productForm.requiresPrescription ? "rx" : "otc"}
+                    onValueChange={(value) => setProductForm({ ...productForm, requiresPrescription: value === "rx" })}
+                    className="grid grid-cols-2 gap-4"
+                  >
+                    {/* Opción: Venta Libre */}
+                    <div className="relative">
+                      <RadioGroupItem value="otc" id="create-otc" className="peer sr-only" />
+                      <Label
+                        htmlFor="create-otc"
+                        className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-green-600 peer-data-[state=checked]:bg-green-50 cursor-pointer transition-all hover:scale-105"
+                      >
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="p-2 rounded-lg bg-green-100">
+                            <CheckCircle className="h-6 w-6 text-green-600" />
+                          </div>
+                          <div className="flex-1 text-left">
+                            <div className="font-bold text-sm">Venta Libre</div>
+                            <div className="text-xs text-muted-foreground mt-1">Sin receta médica</div>
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+
+                    {/* Opción: Requiere Receta */}
+                    <div className="relative">
+                      <RadioGroupItem value="rx" id="create-rx" className="peer sr-only" />
+                      <Label
+                        htmlFor="create-rx"
+                        className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-red-600 peer-data-[state=checked]:bg-red-50 cursor-pointer transition-all hover:scale-105"
+                      >
+                        <div className="flex items-center gap-3 w-full">
+                          <div className="p-2 rounded-lg bg-red-100">
+                            <Pill className="h-6 w-6 text-red-600" />
+                          </div>
+                          <div className="flex-1 text-left">
+                            <div className="font-bold text-sm">Bajo Receta</div>
+                            <div className="text-xs text-muted-foreground mt-1">Requiere prescripción</div>
+                          </div>
+                        </div>
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
               
               <DialogFooter>
@@ -711,6 +836,54 @@ const PharmacistDashboard = () => {
                           </SelectItem>))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  {/* Selector de Receta */}
+                  <div className="space-y-3 pt-2">
+                    <Label className="text-base font-semibold">Tipo de Venta *</Label>
+                    <RadioGroup 
+                      value={productForm.requiresPrescription ? "rx" : "otc"}
+                      onValueChange={(value) => setProductForm({ ...productForm, requiresPrescription: value === "rx" })}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      {/* Opción: Venta Libre */}
+                      <div className="relative">
+                        <RadioGroupItem value="otc" id="edit-otc" className="peer sr-only" />
+                        <Label
+                          htmlFor="edit-otc"
+                          className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-green-600 peer-data-[state=checked]:bg-green-50 cursor-pointer transition-all hover:scale-105"
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="p-2 rounded-lg bg-green-100">
+                              <CheckCircle className="h-6 w-6 text-green-600" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <div className="font-bold text-sm">Venta Libre</div>
+                              <div className="text-xs text-muted-foreground mt-1">Sin receta médica</div>
+                            </div>
+                          </div>
+                        </Label>
+                      </div>
+
+                      {/* Opción: Requiere Receta */}
+                      <div className="relative">
+                        <RadioGroupItem value="rx" id="edit-rx" className="peer sr-only" />
+                        <Label
+                          htmlFor="edit-rx"
+                          className="flex flex-col items-center justify-between rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-red-600 peer-data-[state=checked]:bg-red-50 cursor-pointer transition-all hover:scale-105"
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <div className="p-2 rounded-lg bg-red-100">
+                              <Pill className="h-6 w-6 text-red-600" />
+                            </div>
+                            <div className="flex-1 text-left">
+                              <div className="font-bold text-sm">Bajo Receta</div>
+                              <div className="text-xs text-muted-foreground mt-1">Requiere prescripción</div>
+                            </div>
+                          </div>
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </div>
                 </div>
                 

@@ -98,3 +98,28 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Flying product animation */
+@keyframes flyToCart {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translate(calc(50vw - 50px), calc(-50vh + 50px)) scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(calc(90vw - 50px), calc(-95vh + 20px)) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.flying-product {
+  animation: flyToCart 0.6s ease-in-out forwards;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+}

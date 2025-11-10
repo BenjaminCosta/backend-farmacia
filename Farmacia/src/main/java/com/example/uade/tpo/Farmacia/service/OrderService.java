@@ -19,6 +19,9 @@ public interface OrderService {
   // Procesar orden - ahora retorna OrderSummaryDTO actualizado
   OrderSummaryDTO processOrderSummary(Long id, Order.Status newStatus);
   
+  // 🔴 Nuevo método para farmacéuticos: marcar pickup completado
+  OrderSummaryDTO markPickupComplete(Long orderId);
+  
   // Métodos existentes
   List<OrderDTO> myOrdersDTO(String email);
   OrderDTO getUserOrderDTO(Long id, String email);

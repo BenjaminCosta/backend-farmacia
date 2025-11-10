@@ -29,6 +29,9 @@ public class Product {
   @Column(precision = 10, scale = 2)
   private BigDecimal descuento;
 
+  @Column(nullable = false)
+  private Boolean requiresPrescription = false;
+
   @ManyToOne(optional = false)
   @JoinColumn(name = "category_id", nullable = false)
   private Category category;

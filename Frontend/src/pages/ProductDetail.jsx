@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Minus, Plus, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, ArrowLeft, AlertCircle, Pill, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { useAppDispatch } from '@/store/hooks';
 import { addItem } from '@/store/cart/cartSlice';
 import { formatPrice } from '@/lib/formatPrice';
@@ -106,8 +108,47 @@ const ProductDetail = () => {
 
           {/* Details */}
           <div>
-            <h1 className="text-4xl font-bold mb-4">{product.name}</h1>
+            <div className="flex items-start justify-between mb-4">
+              <h1 className="text-4xl font-bold flex-1">{product.name}</h1>
+              {/* 🔴 Badge RX o OTC */}
+              {product.requiresPrescription ? (
+                <Badge className="bg-gradient-to-r from-red-600 to-red-700 text-white border-2 border-red-400 px-4 py-2 text-base font-bold shadow-lg">
+                  <Pill className="mr-2 h-5 w-5" />
+                  RECETA
+                </Badge>
+              ) : (
+                <Badge className="bg-gradient-to-r from-green-600 to-green-700 text-white border-2 border-green-400 px-3 py-1.5 text-sm font-semibold">
+                  ✓ Venta Libre
+                </Badge>
+              )}
+            </div>
+            
             <p className="text-3xl font-bold text-primary mb-6">{formatPrice(product.price)}</p>
+            
+            {/* 🔴 Alert RX - Información importante */}
+            {product.requiresPrescription && (
+              <Alert className="mb-6 border-2 border-red-500 bg-red-50">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <AlertTitle className="text-red-900 font-bold text-lg">
+                  Medicamento bajo receta médica
+                </AlertTitle>
+                <AlertDescription className="text-red-800 space-y-2 mt-2">
+                  <p className="font-semibold">
+                    ⚕️ Este producto requiere prescripción médica válida.
+                  </p>
+                  <div className="bg-white/60 rounded-md p-3 mt-2 space-y-1 text-sm">
+                    <p className="flex items-center gap-2">
+                      <Home className="h-4 w-4" />
+                      <strong>Solo retiro en farmacia:</strong> No disponible para envío a domicilio
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Pill className="h-4 w-4" />
+                      <strong>Debe presentar receta:</strong> Al momento de retirar el producto
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
 
             {product.description && (<div className="mb-6">
                 <h2 className="text-xl font-semibold mb-2">Descripción</h2>
@@ -146,9 +187,25 @@ const ProductDetail = () => {
             </Card>
 
             <div className="text-sm text-muted-foreground space-y-2">
-              <p>✓ Envío a domicilio disponible</p>
-              <p>✓ Retiro en farmacia sin costo</p>
-              <p>✓ Productos certificados y originales</p>
+              {product.requiresPrescription ? (
+                <>
+                  <p className="flex items-center gap-2 text-red-700 font-semibold">
+                    <Home className="h-4 w-4" />
+                    Solo retiro en farmacia (no disponible envío)
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <Pill className="h-4 w-4" />
+                    Requiere presentación de receta médica
+                  </p>
+                  <p>✓ Productos certificados y originales</p>
+                </>
+              ) : (
+                <>
+                  <p>✓ Envío a domicilio disponible</p>
+                  <p>✓ Retiro en farmacia sin costo</p>
+                  <p>✓ Productos certificados y originales</p>
+                </>
+              )}
             </div>
           </div>
         </div>

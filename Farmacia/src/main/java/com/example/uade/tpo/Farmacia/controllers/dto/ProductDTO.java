@@ -7,6 +7,7 @@ public record ProductDTO(
     Double price,
     Integer stock,
     Double discount,
+    Boolean requiresPrescription,
     Long categoryId,
     String categoryName
 ) {}
