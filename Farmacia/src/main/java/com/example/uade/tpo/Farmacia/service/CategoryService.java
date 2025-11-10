@@ -3,11 +3,14 @@ package com.example.uade.tpo.Farmacia.service;
 import com.example.uade.tpo.Farmacia.controllers.dto.CategoryRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CategoryResponse;
 import com.example.uade.tpo.Farmacia.entity.Category;
+import com.example.uade.tpo.Farmacia.exception.ConflictException;
 import com.example.uade.tpo.Farmacia.repository.CategoryRepository;
+import com.example.uade.tpo.Farmacia.repository.ProductRepository;
 
 import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +22,7 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepository repo;
+    private final ProductRepository products;
 
     public List<CategoryResponse> findAll() {
         log.debug("Fetching all categories");
@@ -134,11 +138,21 @@ public class CategoryService {
                 throw new NotFoundException("Categoría no encontrada con ID: " + id);
             }
             
+            // Validar que la categoría no tenga productos asociados
+            boolean hasProducts = products.existsByCategoryId(id);
+            if (hasProducts) {
+                log.warn("Cannot delete category {} - has associated products", id);
+                throw new ConflictException("No se puede eliminar la categoría: tiene productos asociados");
+            }
+            
             repo.deleteById(id);
             log.info("Category deleted successfully: {}", id);
             
-        } catch (NotFoundException ex) {
+        } catch (NotFoundException | ConflictException ex) {
             throw ex;
+        } catch (DataIntegrityViolationException ex) {
+            log.error("Data integrity violation deleting category {}: {}", id, ex.getMessage());
+            throw new ConflictException("No se puede eliminar la categoría: tiene productos asociados");
         } catch (Exception ex) {
             log.error("Error deleting category {}: {}", id, ex.getMessage(), ex);
             throw new RuntimeException("Error al eliminar la categoría: " + ex.getMessage(), ex);

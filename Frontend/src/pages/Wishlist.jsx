@@ -3,14 +3,22 @@ import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useWishlist } from '@/context/WishlistContext';
-import { useCart } from '@/context/CartContext';
+import { useAppDispatch } from '@/store/hooks';
+import { addItem } from '@/store/cart/cartSlice';
 import { formatPrice } from '@/lib/formatPrice';
+
 const Wishlist = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const { items, removeItem } = useWishlist();
-    const { addItem } = useCart();
+    
     const handleAddToCart = (item) => {
-        addItem(item);
+        dispatch(addItem({ 
+            productId: item.id, 
+            name: item.name, 
+            price: item.price, 
+            quantity: 1 
+        }));
     };
     if (items.length === 0) {
         return (<div className="min-h-screen bg-background flex items-center justify-center">

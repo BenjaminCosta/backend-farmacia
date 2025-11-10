@@ -1,18 +1,27 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Heart } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { useCart } from '@/context/CartContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { selectUser, selectIsAuthenticated, logout } from '@/store/auth/authSlice';
+import { selectCartItemsCount } from '@/store/cart/cartSlice';
 import { useWishlist } from '@/context/WishlistContext';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
+
 const Navbar = () => {
-    const { isAuthenticated, isAdmin, isPharmacist, user, logout } = useAuth();
-    const { totalItems } = useCart();
-    const { items: wishlistItems } = useWishlist();
+    const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    const user = useAppSelector(selectUser);
+    const totalItems = useAppSelector(selectCartItemsCount);
+    const { items: wishlistItems } = useWishlist();
+    
+    const isAdmin = user?.role === 'ADMIN';
+    const isPharmacist = user?.role === 'PHARMACIST';
+
     const handleLogout = () => {
-        logout();
+        dispatch(logout());
         navigate('/');
     };
     return (<nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/40 shadow-sm">

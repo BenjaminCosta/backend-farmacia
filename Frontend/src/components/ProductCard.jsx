@@ -4,13 +4,14 @@ import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { formatPrice } from '@/lib/formatPrice';
-import { useCart } from '@/context/CartContext';
+import { useAppDispatch } from '@/store/hooks';
+import { addItem } from '@/store/cart/cartSlice';
 import { useWishlist } from '@/context/WishlistContext';
 import { cn } from '@/lib/utils';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
 
 const ProductCard = ({ id, name, price, image, description }) => {
-    const { addItem } = useCart();
+    const dispatch = useAppDispatch();
     const { addItem: addToWishlist, isInWishlist, removeItem: removeFromWishlist } = useWishlist();
     const [primaryImage, setPrimaryImage] = useState(null);
     const [imageLoading, setImageLoading] = useState(true);
@@ -19,7 +20,7 @@ const ProductCard = ({ id, name, price, image, description }) => {
         const fetchPrimaryImage = async () => {
             try {
                 setImageLoading(true);
-                const response = await apiClient.get(`/products/${id}/images`);
+                const response = await client.get(`/api/v1/products/${id}/images`);
                 const images = response.data;
                 const primary = images.find(img => img.isPrimary) || images[0];
                 setPrimaryImage(primary);
@@ -40,7 +41,7 @@ const ProductCard = ({ id, name, price, image, description }) => {
     
     const handleAddToCart = (e) => {
         e.preventDefault();
-        addItem({ id, name, price, image });
+        dispatch(addItem({ productId: id, name, price, quantity: 1 }));
     };
     
     const handleToggleWishlist = (e) => {

@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
+
 const Orders = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
@@ -16,7 +17,7 @@ const Orders = () => {
     }, []);
     const fetchOrders = async () => {
         try {
-            const response = await apiClient.get('/orders');
+            const response = await client.get('/api/v1/orders');
             const ordersData = response.data || [];
             // Mapear la respuesta del backend al formato esperado por el frontend
             const mappedOrders = ordersData.map((order) => ({

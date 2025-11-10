@@ -2,11 +2,29 @@ import { useNavigate } from 'react-router-dom';
 import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useCart } from '@/context/CartContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { selectCartItems, selectCartTotal, selectCartItemsCount, removeItem, updateQuantity } from '@/store/cart/cartSlice';
 import { formatPrice } from '@/lib/formatPrice';
+
 const Cart = () => {
     const navigate = useNavigate();
-    const { items, removeItem, updateQuantity, totalPrice, totalItems } = useCart();
+    const dispatch = useAppDispatch();
+    
+    const items = useAppSelector(selectCartItems);
+    const totalPrice = useAppSelector(selectCartTotal);
+    const totalItems = useAppSelector(selectCartItemsCount);
+
+    const handleRemove = (productId) => {
+        dispatch(removeItem(productId));
+    };
+
+    const handleUpdateQuantity = (productId, quantity) => {
+        if (quantity < 1) {
+            dispatch(removeItem(productId));
+        } else {
+            dispatch(updateQuantity({ productId, quantity }));
+        }
+    };
     if (items.length === 0) {
         return (<div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -26,7 +44,7 @@ const Cart = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {items.map((item) => (<Card key={item.id}>
+            {items.map((item) => (<Card key={item.productId}>
                 <CardContent className="p-6">
                   <div className="flex gap-4">
                     {/* Image */}
@@ -44,17 +62,17 @@ const Cart = () => {
                       <div className="flex items-center justify-between">
                         {/* Quantity Controls */}
                         <div className="flex items-center space-x-3">
-                          <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity - 1)}>
+                          <Button variant="outline" size="icon" onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}>
                             <Minus className="h-4 w-4"/>
                           </Button>
                           <span className="font-semibold w-8 text-center">{item.quantity}</span>
-                          <Button variant="outline" size="icon" onClick={() => updateQuantity(item.id, item.quantity + 1)}>
+                          <Button variant="outline" size="icon" onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}>
                             <Plus className="h-4 w-4"/>
                           </Button>
                         </div>
 
                         {/* Remove Button */}
-                        <Button variant="ghost" size="icon" onClick={() => removeItem(item.id)} className="text-destructive">
+                        <Button variant="ghost" size="icon" onClick={() => handleRemove(item.productId)} className="text-destructive">
                           <Trash2 className="h-4 w-4"/>
                         </Button>
                       </div>

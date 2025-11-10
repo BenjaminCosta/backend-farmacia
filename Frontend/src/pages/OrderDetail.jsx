@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
+
 const OrderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const OrderDetail = () => {
         if (!id)
             return;
         try {
-            const response = await apiClient.get(`/orders/${id}`);
+            const response = await client.get(`/api/v1/orders/${id}`);
             const orderData = response.data;
             // Mapear la respuesta del backend al formato esperado
             const mappedOrder = {

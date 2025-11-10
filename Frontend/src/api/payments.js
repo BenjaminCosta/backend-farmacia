@@ -1,4 +1,4 @@
-import apiClient from '../lib/axios';
+import client from './client';
 
 /**
  * Crear un Payment Intent con Stripe
@@ -6,7 +6,7 @@ import apiClient from '../lib/axios';
  * @returns {Promise<Object>} - { clientSecret, paymentIntentId }
  */
 export const createPaymentIntent = async (data) => {
-  const response = await apiClient.post('/payments/create-intent', data);
+  const response = await client.post('/api/v1/payments/create-intent', data);
   return response.data;
 };
 
@@ -17,6 +17,6 @@ export const createPaymentIntent = async (data) => {
  * @returns {Promise<Object>} - Orden actualizada
  */
 export const confirmOrderPayment = async (orderId, data) => {
-  const response = await apiClient.post(`/payments/orders/${orderId}/pay`, data);
+  const response = await client.post(`/api/v1/payments/orders/${orderId}/pay`, data);
   return response.data;
 };

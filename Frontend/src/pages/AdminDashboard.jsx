@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
 import { toast } from 'sonner';
 import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
 const AdminDashboard = () => {
@@ -20,8 +20,8 @@ const AdminDashboard = () => {
         setLoading(true);
         try {
             const [productsRes, categoriesRes] = await Promise.all([
-                apiClient.get('/products'),
-                apiClient.get('/categories'),
+                client.get('/api/v1/products'),
+                client.get('/api/v1/categories'),
             ]);
             setProducts(normalizeProducts(productsRes.data));
             setCategories(normalizeCategories(categoriesRes.data));
@@ -46,7 +46,7 @@ const AdminDashboard = () => {
         if (!confirm('¿Estás seguro de eliminar este producto?'))
             return;
         try {
-            await apiClient.delete(`/products/${id}`);
+            await client.delete(`/api/v1/products/${id}`);
             setProducts(products.filter((p) => p.id !== id));
             toast.success('Producto eliminado');
         }
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
         if (!confirm('¿Estás seguro de eliminar esta categoría?'))
             return;
         try {
-            await apiClient.delete(`/categories/${id}`);
+            await client.delete(`/api/v1/categories/${id}`);
             setCategories(categories.filter((c) => c.id !== id));
             toast.success('Categoría eliminada');
         }

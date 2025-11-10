@@ -12,7 +12,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
-import apiClient from '../lib/axios';
+import client from '../api/client';
 import ProductImageUploader from './ProductImageUploader';
 
 const ProductImageManager = ({ productId }) => {
@@ -24,7 +24,7 @@ const ProductImageManager = ({ productId }) => {
   const fetchImages = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(`/products/${productId}/images`);
+      const response = await client.get(`/api/v1/products/${productId}/images`);
       setImages(response.data);
     } catch (error) {
       console.error('Error cargando imágenes:', error);
@@ -47,7 +47,7 @@ const ProductImageManager = ({ productId }) => {
 
   const handleSetPrimary = async (imageId) => {
     try {
-      await apiClient.put(`/products/${productId}/images/${imageId}/primary`);
+      await client.put(`/api/v1/products/${productId}/images/${imageId}/primary`);
       await fetchImages(); // Recargar
     } catch (error) {
       console.error('Error marcando como principal:', error);
@@ -58,7 +58,7 @@ const ProductImageManager = ({ productId }) => {
     if (!imageToDelete) return;
 
     try {
-      await apiClient.delete(`/products/${productId}/images/${imageToDelete}`);
+      await client.delete(`/api/v1/products/${productId}/images/${imageToDelete}`);
       await fetchImages(); // Recargar
       setDeleteDialogOpen(false);
       setImageToDelete(null);

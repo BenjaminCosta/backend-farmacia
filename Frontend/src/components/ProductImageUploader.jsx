@@ -3,7 +3,7 @@ import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
-import apiClient from '../lib/axios';
+import client from '../api/client';
 
 const ProductImageUploader = ({ productId, onUploadSuccess }) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -82,7 +82,7 @@ const ProductImageUploader = ({ productId, onUploadSuccess }) => {
         formData.append('files', file);
       });
 
-      await apiClient.post(`/products/${productId}/images`, formData, {
+      await client.post(`/api/v1/products/${productId}/images`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

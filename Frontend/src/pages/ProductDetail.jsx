@@ -3,16 +3,17 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingCart, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useCart } from '@/context/CartContext';
+import { useAppDispatch } from '@/store/hooks';
+import { addItem } from '@/store/cart/cartSlice';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
 import ProductImageGallery from '@/components/ProductImageGallery';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { addItem } = useCart();
+    const dispatch = useAppDispatch();
     const [product, setProduct] = useState(null);
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,7 +27,7 @@ const ProductDetail = () => {
     
     const fetchProduct = async () => {
         try {
-            const response = await apiClient.get(`/products/${id}`);
+            const response = await client.get(`/api/v1/products/${id}`);
             setProduct(response.data);
         }
         catch (error) {
@@ -48,7 +49,7 @@ const ProductDetail = () => {
     const fetchImages = async () => {
         try {
             setLoadingImages(true);
-            const response = await apiClient.get(`/products/${id}/images`);
+            const response = await client.get(`/api/v1/products/${id}/images`);
             setImages(response.data);
         } catch (error) {
             console.error('Error cargando imágenes:', error);
@@ -58,12 +59,12 @@ const ProductDetail = () => {
     };
     const handleAddToCart = () => {
         if (product) {
-            addItem({
-                id: product.id,
+            dispatch(addItem({
+                productId: product.id,
                 name: product.name,
                 price: product.price,
-                image: product.image,
-            }, quantity);
+                quantity: quantity,
+            }));
             navigate('/cart');
         }
     };

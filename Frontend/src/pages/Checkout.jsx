@@ -6,11 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { selectCartItems, selectCartTotal, clear as clearCart } from '@/store/cart/cartSlice';
+import { selectIsAuthenticated } from '@/store/auth/authSlice';
+import { createOrder, selectLastCreatedOrderId, clearLastCreatedId } from '@/store/orders/ordersSlice';
 import { formatPrice } from '@/lib/formatPrice';
 import { toast } from 'sonner';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
 import stripePromise from '@/lib/stripe';
 import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
 import CardPaymentForm from '@/components/checkout/CardPaymentForm';
@@ -23,8 +25,13 @@ const SHIPPING_COST = 0; // Envío gratis
 
 const Checkout = () => {
     const navigate = useNavigate();
-    const { items, totalPrice, clearCart } = useCart();
-    const { isAuthenticated } = useAuth();
+    const dispatch = useAppDispatch();
+    
+    const items = useAppSelector(selectCartItems);
+    const totalPrice = useAppSelector(selectCartTotal);
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    const lastCreatedOrderId = useAppSelector(selectLastCreatedOrderId);
+    
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState(null);
     const [createdOrderId, setCreatedOrderId] = useState(null);
@@ -110,7 +117,7 @@ const Checkout = () => {
             if (formData.paymentMethod === 'card' && !clientSecret && items.length > 0) {
                 try {
                     // Create a temporary payment intent just with the amount
-                    const response = await apiClient.post('/payments/create-intent-temp', {
+                    const response = await client.post('/api/v1/payments/create-intent-temp', {
                         amount: payableAmount,
                         currency: CURRENCY.toLowerCase(),
                     });
@@ -163,17 +170,24 @@ const Checkout = () => {
                     zip: formData.zipCode
                 },
                 items: items.map((item) => ({
-                    productId: item.id,
+                    productId: item.productId,
                     quantity: item.quantity
                 }))
             };
-            const response = await apiClient.post('/orders', orderData);
-            clearCart();
+            
+            // Usar Redux para crear la orden
+            const result = await dispatch(createOrder(orderData)).unwrap();
+            
+            // Limpiar carrito Redux
+            dispatch(clearCart());
+            
             toast.success('¡Pedido realizado con éxito!');
-            navigate('/orders');
+            
+            // Navegar a /orders/:id usando el ID devuelto
+            navigate(`/orders/${result.id}`);
         } catch (error) {
             console.error('Error creating order:', error);
-            toast.error(error.response?.data?.message || 'Error al procesar el pedido');
+            toast.error(error || 'Error al procesar el pedido');
         } finally {
             setLoading(false);
         }
@@ -189,7 +203,7 @@ const Checkout = () => {
             
             console.log('📦 Creando orden con datos:', orderData);
 
-            // 1. Crear la orden
+            // 1. Crear la orden usando Redux
             const orderPayload = {
                 fullName: orderData.fullName,
                 email: orderData.email,
@@ -202,19 +216,18 @@ const Checkout = () => {
                     zip: orderData.zipCode
                 },
                 items: items.map(item => ({
-                    productId: item.id,
+                    productId: item.productId,
                     quantity: item.quantity
                 }))
             };
 
-            console.log('🚀 POST /orders con payload:', orderPayload);
-            const orderResponse = await apiClient.post('/orders', orderPayload);
-            console.log('📬 Orden creada:', orderResponse.data);
-            const createdOrder = orderResponse.data;
+            console.log('🚀 Creando orden con Redux:', orderPayload);
+            const createdOrder = await dispatch(createOrder(orderPayload)).unwrap();
+            console.log('📬 Orden creada:', createdOrder);
 
             // 2. Confirmar el pago asociado a la orden
-            console.log(`💳 Confirmando pago para orden ${createdOrder.orderId}`);
-            await apiClient.post(`/payments/orders/${createdOrder.orderId}/pay`, {
+            console.log(`💳 Confirmando pago para orden ${createdOrder.id}`);
+            await client.post(`/api/v1/payments/orders/${createdOrder.id}/pay`, {
                 paymentIntentId: paymentId
             });
 
@@ -222,10 +235,12 @@ const Checkout = () => {
             localStorage.removeItem('checkoutFormData');
             localStorage.removeItem('pendingPaymentIntentId');
 
-            clearCart();
+            // Limpiar carrito Redux
+            dispatch(clearCart());
+            
             toast.success('¡Pedido procesado exitosamente!');
-            console.log('🎉 Navegando a /payment-success con orderId:', createdOrder.orderId);
-            navigate(`/payment-success?orderId=${createdOrder.orderId}`);
+            console.log('🎉 Navegando a /payment-success con orderId:', createdOrder.id);
+            navigate(`/payment-success?orderId=${createdOrder.id}`);
         } catch (error) {
             console.error('❌ Error en handlePaymentSuccess:', error);
             toast.error('Error al procesar la orden');
@@ -381,7 +396,7 @@ const Checkout = () => {
                 <CardTitle>Resumen del Pedido</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {items.map((item) => (<div key={item.id} className="flex justify-between text-sm">
+                {items.map((item) => (<div key={item.productId} className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
                       {item.name} x{item.quantity}
                     </span>

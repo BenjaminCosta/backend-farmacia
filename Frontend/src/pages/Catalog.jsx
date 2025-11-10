@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ProductCard from '@/components/ProductCard';
 import Loader from '@/components/Loader';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
 import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
 const Catalog = () => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -27,7 +27,7 @@ const Catalog = () => {
     }, [categoryId, searchQuery, page, size]);
     const fetchCategories = async () => {
         try {
-            const response = await apiClient.get('/categories');
+            const response = await client.get('/api/v1/categories');
             setCategories(normalizeCategories(response.data));
         }
         catch (error) {
@@ -45,7 +45,7 @@ const Catalog = () => {
                 params.append('q', searchQuery);
             params.append('page', page.toString());
             params.append('size', size.toString());
-            const response = await apiClient.get(`/products?${params.toString()}`);
+            const response = await client.get(`/api/v1/products?${params.toString()}`);
             setProducts(normalizeProducts(response.data));
         }
         catch (error) {

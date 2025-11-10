@@ -70,7 +70,11 @@ public class ProductController {
       ProductDTO dto = toProductDTO(saved);
       
       log.info("✅ Product created with ID: {}", saved.getId());
-      return ResponseEntity.created(URI.create("/products/" + saved.getId())).body(dto);
+      
+      // Retornar 201 Created con Location header y body ProductDTO
+      return ResponseEntity
+          .created(URI.create("/api/v1/products/" + saved.getId()))
+          .body(dto);
     } catch (Exception ex) {
       log.error("❌ Error creating product: {}", ex.getMessage());
       throw ex;
@@ -79,11 +83,14 @@ public class ProductController {
 
   @PutMapping("/{id}")
   @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
-  public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product p) {
+  public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody Product p) {
     try {
       log.info("PUT /products/{} - Updating product", id);
       Product updated = service.update(id, p);
-      return ResponseEntity.ok(updated);
+      ProductDTO dto = toProductDTO(updated);
+      
+      // Retornar 200 OK con ProductDTO actualizado
+      return ResponseEntity.ok(dto);
     } catch (Exception ex) {
       log.error("Error updating product {}: {}", id, ex.getMessage());
       throw ex;
@@ -96,10 +103,12 @@ public class ProductController {
     try {
       log.info("DELETE /products/{}", id);
       service.delete(id);
+      
+      // Retornar 204 No Content si elimina exitosamente
       return ResponseEntity.noContent().build();
     } catch (Exception ex) {
       log.error("Error deleting product {}: {}", id, ex.getMessage());
-      throw ex;
+      throw ex; // GlobalExceptionHandler manejará ConflictException como 409
     }
   }
   

@@ -1,9 +1,11 @@
 package com.example.uade.tpo.Farmacia.exception;
 
 import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,9 +14,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
+// Manejador global de excepciones para respuestas consistentes
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -94,9 +98,14 @@ public class GlobalExceptionHandler {
      * Retorna 409 Conflict
      */
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex,
+            HttpServletRequest request) {
         Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", Instant.now().toString());
         response.put("status", HttpStatus.CONFLICT.value());
+        response.put("error", HttpStatus.CONFLICT.getReasonPhrase());
+        response.put("path", request.getRequestURI());
         
         String message = "Conflicto de integridad de datos";
         if (ex.getMessage() != null) {
@@ -108,9 +117,87 @@ public class GlobalExceptionHandler {
         }
         response.put("message", message);
         
-        log.warn("Data integrity violation: {}", ex.getMessage());
+        log.warn("Data integrity violation: {} - Path: {}", ex.getMessage(), request.getRequestURI());
         
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    /**
+     * Maneja ConflictException personalizada
+     * Retorna 409 Conflict
+     */
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, Object>> handleConflict(
+            ConflictException ex,
+            HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", Instant.now().toString());
+        response.put("status", HttpStatus.CONFLICT.value());
+        response.put("error", HttpStatus.CONFLICT.getReasonPhrase());
+        response.put("message", ex.getMessage());
+        response.put("path", request.getRequestURI());
+        
+        log.warn("Conflict: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+        
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    /**
+     * Maneja BadRequestException personalizada
+     * Retorna 400 Bad Request
+     */
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleBadRequest(
+            BadRequestException ex,
+            HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", Instant.now().toString());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        response.put("message", ex.getMessage());
+        response.put("path", request.getRequestURI());
+        
+        log.warn("Bad Request: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    /**
+     * Maneja AccessDeniedException (403 Forbidden)
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(
+            AccessDeniedException ex,
+            HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", Instant.now().toString());
+        response.put("status", HttpStatus.FORBIDDEN.value());
+        response.put("error", HttpStatus.FORBIDDEN.getReasonPhrase());
+        response.put("message", "No tiene permisos para realizar esta acción");
+        response.put("path", request.getRequestURI());
+        
+        log.warn("Access Denied: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+        
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    /**
+     * Maneja IllegalStateException como 400 Bad Request
+     */
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalState(
+            IllegalStateException ex,
+            HttpServletRequest request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("timestamp", Instant.now().toString());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
+        response.put("error", HttpStatus.BAD_REQUEST.getReasonPhrase());
+        response.put("message", ex.getMessage());
+        response.put("path", request.getRequestURI());
+        
+        log.warn("Invalid State: {} - Path: {}", ex.getMessage(), request.getRequestURI());
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     /**

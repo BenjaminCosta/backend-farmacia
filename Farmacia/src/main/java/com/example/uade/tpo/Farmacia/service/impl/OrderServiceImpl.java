@@ -4,10 +4,12 @@ import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderResponse;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderDTO;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderItemDTO;
+import com.example.uade.tpo.Farmacia.controllers.dto.OrderSummaryDTO;
 import com.example.uade.tpo.Farmacia.entity.Order;
 import com.example.uade.tpo.Farmacia.entity.OrderItem;
 import com.example.uade.tpo.Farmacia.entity.Product;
 import com.example.uade.tpo.Farmacia.entity.User;
+import com.example.uade.tpo.Farmacia.exception.BadRequestException;
 import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 import com.example.uade.tpo.Farmacia.repository.OrderItemRepository;
 import com.example.uade.tpo.Farmacia.repository.OrderRepository;
@@ -34,6 +36,21 @@ public class OrderServiceImpl implements OrderService {
   private final UserRepository users;
   private final ProductRepository products;
   private final OrderItemRepository orderItems;
+
+  @Override
+  @Transactional
+  public OrderSummaryDTO createOrderSummary(String email, CreateOrderRequest request) {
+    log.info("📦 Iniciando creación de orden (OrderSummaryDTO) para: {}", email);
+    
+    // Reutilizar la lógica existente
+    CreateOrderResponse response = createOrder(email, request);
+    
+    // Obtener la orden completa para mapearla
+    Order order = orders.findById(response.getOrderId())
+        .orElseThrow(() -> new NotFoundException("Orden recién creada no encontrada"));
+    
+    return toOrderSummaryDTO(order);
+  }
 
   @Override
   @Transactional
@@ -215,36 +232,121 @@ public class OrderServiceImpl implements OrderService {
           return new NotFoundException("Orden no encontrada con ID: " + id);
         });
     
-    // Validar transiciones de estado permitidas
-    Order.Status currentStatus = order.getStatus();
-    
-    log.debug("Estado actual: {} -> Nuevo estado: {}", currentStatus, newStatus);
-    
-    // PENDING puede ir a PROCESSING, COMPLETED o CANCELLED
-    // PROCESSING puede ir a COMPLETED o CANCELLED
-    // COMPLETED es final (no puede cambiar)
-    // CANCELLED es final (no puede cambiar)
-    
-    if (currentStatus == Order.Status.COMPLETED) {
-      log.warn("⚠️ No se puede cambiar el estado de una orden completada - Orden: {}", id);
-      throw new IllegalStateException("No se puede cambiar el estado de una orden completada");
-    }
-    
-    if (currentStatus == Order.Status.CANCELLED) {
-      log.warn("⚠️ No se puede cambiar el estado de una orden cancelada - Orden: {}", id);
-      throw new IllegalStateException("No se puede cambiar el estado de una orden cancelada");
-    }
+    // Validar transiciones de estado
+    validateStatusTransition(order.getStatus(), newStatus, id);
     
     // Actualizar el estado
     order.setStatus(newStatus);
     Order updatedOrder = orders.save(order);
     
-    log.info("✅ Orden {} actualizada - Estado: {} -> {}", id, currentStatus, newStatus);
+    log.info("✅ Orden {} actualizada - Estado: {} -> {}", id, order.getStatus(), newStatus);
     
     return toDTO(updatedOrder);
   }
 
+  @Override
+  public OrderSummaryDTO processOrderSummary(Long id, Order.Status newStatus) {
+    log.info("🔄 Procesando orden (OrderSummaryDTO) {} - Nuevo estado: {}", id, newStatus);
+    
+    Order order = orders.findById(id)
+        .orElseThrow(() -> {
+          log.error("❌ Orden {} no encontrada", id);
+          return new NotFoundException("Orden no encontrada con ID: " + id);
+        });
+    
+    // Validar transiciones de estado
+    validateStatusTransition(order.getStatus(), newStatus, id);
+    
+    // Actualizar el estado
+    Order.Status previousStatus = order.getStatus();
+    order.setStatus(newStatus);
+    Order updatedOrder = orders.save(order);
+    
+    log.info("✅ Orden {} actualizada - Estado: {} -> {}", id, previousStatus, newStatus);
+    
+    return toOrderSummaryDTO(updatedOrder);
+  }
+
   // ================= Helpers =================
+
+  // Validar transiciones de estado permitidas
+  private void validateStatusTransition(Order.Status currentStatus, Order.Status newStatus, Long orderId) {
+    log.debug("Validando transición: {} -> {}", currentStatus, newStatus);
+    
+    // Estados finales no pueden cambiar
+    if (currentStatus == Order.Status.COMPLETED) {
+      log.warn("⚠️ Transición no permitida de COMPLETED a {} - Orden: {}", newStatus, orderId);
+      throw new BadRequestException("Transición no permitida de COMPLETED a " + newStatus);
+    }
+    
+    if (currentStatus == Order.Status.CANCELLED) {
+      log.warn("⚠️ Transición no permitida de CANCELLED a {} - Orden: {}", newStatus, orderId);
+      throw new BadRequestException("Transición no permitida de CANCELLED a " + newStatus);
+    }
+    
+    // Validar transiciones específicas
+    // PENDING -> PROCESSING, CONFIRMED, CANCELLED
+    // PROCESSING -> COMPLETED, CANCELLED
+    // CONFIRMED -> PROCESSING, CANCELLED
+    
+    if (currentStatus == Order.Status.PENDING) {
+      if (newStatus != Order.Status.PROCESSING && 
+          newStatus != Order.Status.CONFIRMED && 
+          newStatus != Order.Status.CANCELLED) {
+        log.warn("⚠️ Transición no permitida de PENDING a {} - Orden: {}", newStatus, orderId);
+        throw new BadRequestException("Transición no permitida de PENDING a " + newStatus);
+      }
+    }
+    
+    if (currentStatus == Order.Status.PROCESSING) {
+      if (newStatus != Order.Status.COMPLETED && newStatus != Order.Status.CANCELLED) {
+        log.warn("⚠️ Transición no permitida de PROCESSING a {} - Orden: {}", newStatus, orderId);
+        throw new BadRequestException("Transición no permitida de PROCESSING a " + newStatus);
+      }
+    }
+  }
+
+  // Mapear Order a OrderSummaryDTO
+  private OrderSummaryDTO toOrderSummaryDTO(Order order) {
+    // Mapear items
+    List<OrderSummaryDTO.OrderItemSummary> items = order.getItems()
+        .stream()
+        .map(item -> new OrderSummaryDTO.OrderItemSummary(
+            item.getProduct().getId(),
+            item.getProduct().getNombre(),
+            item.getUnitPrice(),
+            item.getQuantity(),
+            item.getLineTotal()
+        ))
+        .collect(Collectors.toList());
+    
+    // Mapear delivery info
+    OrderSummaryDTO.DeliveryInfo delivery = new OrderSummaryDTO.DeliveryInfo(
+        order.getFullName(),
+        order.getDeliveryStreet(),
+        order.getDeliveryCity(),
+        order.getDeliveryZip(),
+        order.getDeliveryPhone(),
+        order.getDeliveryEmail(),
+        order.getDeliveryMethod()
+    );
+    
+    // Mapear payment info
+    OrderSummaryDTO.PaymentInfo payment = new OrderSummaryDTO.PaymentInfo(
+        order.getPaymentMethod(),
+        order.getPaymentStatus() != null ? order.getPaymentStatus().name() : "PENDING"
+    );
+    
+    return new OrderSummaryDTO(
+        order.getId(),
+        order.getStatus().name(),
+        order.getTotal(),
+        order.getCreatedAt(),
+        items,
+        delivery,
+        payment
+    );
+  }
 
   private OrderDTO toDTO(Order order) {
     // Mapear items

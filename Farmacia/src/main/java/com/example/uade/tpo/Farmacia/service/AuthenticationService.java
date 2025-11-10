@@ -3,6 +3,7 @@ package com.example.uade.tpo.Farmacia.service;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.uade.tpo.Farmacia.controllers.auth.AuthenticationRequest;
 import com.example.uade.tpo.Farmacia.controllers.auth.AuthenticationResponse;
 import com.example.uade.tpo.Farmacia.controllers.auth.RegisterRequest;
+import com.example.uade.tpo.Farmacia.controllers.auth.UserInfoResponse;
 import com.example.uade.tpo.Farmacia.entity.User;
 import com.example.uade.tpo.Farmacia.entity.RoleType;
 import com.example.uade.tpo.Farmacia.entity.Role;
@@ -167,5 +169,20 @@ public class AuthenticationService {
             log.error("Error inesperado durante la autenticación: {}", e.getMessage(), e);
             throw new RuntimeException("Error al autenticar el usuario: " + e.getMessage());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserInfoResponse getCurrentUser(Authentication authentication) {
+        String email = authentication.getName();
+        
+        User user = repository.findByEmail(email)
+                .orElseThrow(() -> new BadCredentialsException("Usuario no encontrado"));
+        
+        return UserInfoResponse.builder()
+                .id(user.getId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .role(user.getRole().getName())
+                .build();
     }
 }

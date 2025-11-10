@@ -3,11 +3,14 @@ package com.example.uade.tpo.Farmacia.service;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateProductRequest;
 import com.example.uade.tpo.Farmacia.entity.Product;
 import com.example.uade.tpo.Farmacia.entity.Category;
+import com.example.uade.tpo.Farmacia.exception.ConflictException;
 import com.example.uade.tpo.Farmacia.repository.ProductRepository;
 import com.example.uade.tpo.Farmacia.repository.CategoryRepository;
+import com.example.uade.tpo.Farmacia.repository.OrderItemRepository;
 import com.example.uade.tpo.Farmacia.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,6 +22,7 @@ import java.util.List;
 public class ProductService {
   private final ProductRepository repo;
   private final CategoryRepository categories;
+  private final OrderItemRepository orderItems;
 
   public List<Product> list(Long categoryId, String q, Boolean inStock) {
     log.debug("Listing products with filters - categoryId: {}, query: '{}', inStock: {}", 
@@ -223,11 +227,21 @@ public class ProductService {
         throw new NotFoundException("Producto no encontrado con ID: " + id);
       }
       
+      // Validar que el producto no esté referenciado en order_items
+      boolean hasOrders = orderItems.existsByProductId(id);
+      if (hasOrders) {
+        log.warn("Cannot delete product {} - referenced in orders", id);
+        throw new ConflictException("No se puede eliminar: el producto pertenece a órdenes existentes");
+      }
+      
       repo.deleteById(id);
       log.info("Product deleted successfully: {}", id);
       
-    } catch (NotFoundException ex) {
+    } catch (NotFoundException | ConflictException ex) {
       throw ex;
+    } catch (DataIntegrityViolationException ex) {
+      log.error("Data integrity violation deleting product {}: {}", id, ex.getMessage());
+      throw new ConflictException("No se puede eliminar: el producto pertenece a órdenes existentes");
     } catch (Exception ex) {
       log.error("Error deleting product {}: {}", id, ex.getMessage(), ex);
       throw new RuntimeException("Error al eliminar el producto: " + ex.getMessage(), ex);

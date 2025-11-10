@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,73 +6,94 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useAuth } from '@/context/AuthContext';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { login, register, me, clearError, selectIsAuthenticated, selectAuth } from '@/store/auth/authSlice';
 import { Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
+
 const Login = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { login, register, isAuthenticated } = useAuth();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const dispatch = useAppDispatch();
+    
+    const isAuthenticated = useAppSelector(selectIsAuthenticated);
+    const { loading, error: authError } = useAppSelector(selectAuth);
+    
     const [success, setSuccess] = useState(null);
     const [showLoginPassword, setShowLoginPassword] = useState(false);
     const [showRegisterPassword, setShowRegisterPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [loginData, setLoginData] = useState({ email: '', password: '' });
     const [registerData, setRegisterData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+    const [localError, setLocalError] = useState(null);
+
     const from = location.state?.from?.pathname || '/';
+
     // Redirect if already authenticated
-    if (isAuthenticated) {
-        navigate(from, { replace: true });
-    }
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate(from, { replace: true });
+        }
+    }, [isAuthenticated, navigate, from]);
+
     const handleLogin = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError(null);
+        setLocalError(null);
         setSuccess(null);
+        dispatch(clearError());
+
         try {
-            await login(loginData.email, loginData.password);
+            // 1. Login para obtener token
+            await dispatch(login({ email: loginData.email, password: loginData.password })).unwrap();
+            
+            // 2. Cargar datos del usuario con el token
+            await dispatch(me()).unwrap();
+            
             setSuccess('¡Inicio de sesión exitoso! Redirigiendo...');
             setTimeout(() => {
                 navigate(from, { replace: true });
             }, 1000);
-        }
-        catch (err) {
-            const errorMessage = err.response?.data?.message || 'Email o contraseña incorrectos';
-            setError(errorMessage);
-        }
-        finally {
-            setLoading(false);
+        } catch (err) {
+            setLocalError(err || 'Email o contraseña incorrectos');
         }
     };
+
     const handleRegister = async (e) => {
         e.preventDefault();
-        setError(null);
+        setLocalError(null);
         setSuccess(null);
+        dispatch(clearError());
+
         if (registerData.password !== registerData.confirmPassword) {
-            setError('Las contraseñas no coinciden');
+            setLocalError('Las contraseñas no coinciden');
             return;
         }
+
         if (registerData.password.length < 6) {
-            setError('La contraseña debe tener al menos 6 caracteres');
+            setLocalError('La contraseña debe tener al menos 6 caracteres');
             return;
         }
-        setLoading(true);
+
         try {
-            await register(registerData.email, registerData.password, registerData.name);
+            // 1. Register para crear usuario y obtener token
+            await dispatch(register({ 
+                email: registerData.email, 
+                password: registerData.password, 
+                name: registerData.name 
+            })).unwrap();
+            
+            // 2. Cargar datos del usuario con el token
+            await dispatch(me()).unwrap();
+            
             setSuccess('¡Registro exitoso! Redirigiendo...');
             setTimeout(() => {
                 navigate(from, { replace: true });
             }, 1000);
-        }
-        catch (err) {
-            const errorMessage = err.response?.data?.message || 'Error al registrarse. Intenta nuevamente.';
-            setError(errorMessage);
-        }
-        finally {
-            setLoading(false);
+        } catch (err) {
+            setLocalError(err || 'Error al registrarse. Intenta nuevamente.');
         }
     };
+
+    const displayError = localError || authError;
     return (<div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
@@ -84,9 +105,9 @@ const Login = () => {
         </CardHeader>
         <CardContent>
           {/* Mensajes de error y éxito */}
-          {error && (<Alert variant="destructive" className="mb-4">
+          {displayError && (<Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4"/>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{displayError}</AlertDescription>
             </Alert>)}
           
           {success && (<Alert className="mb-4 border-green-500 text-green-700 bg-green-50">
@@ -94,7 +115,11 @@ const Login = () => {
               <AlertDescription>{success}</AlertDescription>
             </Alert>)}
 
-          <Tabs defaultValue="login" onValueChange={() => { setError(null); setSuccess(null); }}>
+          <Tabs defaultValue="login" onValueChange={() => { 
+            setLocalError(null); 
+            setSuccess(null); 
+            dispatch(clearError());
+          }}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Ingresar</TabsTrigger>
               <TabsTrigger value="register">Registrarse</TabsTrigger>

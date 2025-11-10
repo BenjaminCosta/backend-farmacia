@@ -3,6 +3,7 @@ package com.example.uade.tpo.Farmacia.controllers;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderRequest;
 import com.example.uade.tpo.Farmacia.controllers.dto.CreateOrderResponse;
 import com.example.uade.tpo.Farmacia.controllers.dto.OrderDTO;
+import com.example.uade.tpo.Farmacia.controllers.dto.OrderSummaryDTO;
 import com.example.uade.tpo.Farmacia.controllers.dto.UpdateOrderStatusRequest;
 import com.example.uade.tpo.Farmacia.entity.Order;
 import com.example.uade.tpo.Farmacia.service.OrderService;
@@ -15,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @Slf4j
@@ -27,10 +29,10 @@ public class OrderController {
 
   /**
    * POST /api/v1/orders - Crear nueva orden
-   * Este endpoint recibe la información del pedido del frontend y crea la orden.
+   * Retorna 201 Created con OrderSummaryDTO completo y Location header
    */
   @PostMapping
-  public ResponseEntity<CreateOrderResponse> createOrder(
+  public ResponseEntity<OrderSummaryDTO> createOrder(
       @RequestBody CreateOrderRequest request,
       Authentication auth) {
     
@@ -57,13 +59,16 @@ public class OrderController {
         }
       }
       
-      // Crear la orden usando el servicio
-      CreateOrderResponse response = service.createOrder(userEmail, request);
+      // Crear la orden usando el nuevo método que retorna OrderSummaryDTO
+      OrderSummaryDTO summary = service.createOrderSummary(userEmail, request);
       
       log.info("✅ Orden creada exitosamente - OrderId: {}, Total: {}, Usuario: {}", 
-               response.getOrderId(), response.getTotal(), userEmail);
+               summary.id(), summary.total(), userEmail);
       
-      return ResponseEntity.status(HttpStatus.CREATED).body(response);
+      // Retornar 201 Created con Location header y body OrderSummaryDTO
+      return ResponseEntity
+          .created(URI.create("/api/v1/orders/" + summary.id()))
+          .body(summary);
       
     } catch (IllegalArgumentException e) {
       log.error("❌ Error de validación al crear orden - Usuario: {}, Error: {}", 
@@ -135,12 +140,12 @@ public class OrderController {
 
   /**
    * PUT /api/v1/orders/{id}/status - Actualizar estado de orden (Farmacéutico/Admin)
-   * Este endpoint permite cambiar el estado de una orden.
-   * Frontend envía: { "status": "PENDING" | "PAID" | "CANCELLED" }
+   * Retorna OrderSummaryDTO actualizado
+   * 400 Bad Request si la transición no es válida
    */
   @PutMapping("/{id}/status")
   @PreAuthorize("hasRole('PHARMACIST') or hasRole('ADMIN')")
-  public ResponseEntity<OrderDTO> updateOrderStatus(
+  public ResponseEntity<OrderSummaryDTO> updateOrderStatus(
       @PathVariable Long id,
       @RequestBody UpdateOrderStatusRequest request,
       Authentication auth) {
@@ -155,7 +160,8 @@ public class OrderController {
         throw new IllegalArgumentException("El estado es requerido");
       }
       
-      OrderDTO updatedOrder = service.processOrder(id, request.getStatus());
+      // Usar el nuevo método que retorna OrderSummaryDTO y valida transiciones
+      OrderSummaryDTO updatedOrder = service.processOrderSummary(id, request.getStatus());
       
       log.info("✅ Estado de orden actualizado - ID: {}, Nuevo estado: {}", 
                id, request.getStatus());

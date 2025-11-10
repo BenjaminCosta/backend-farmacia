@@ -55,7 +55,7 @@ const Home = () => {
     return (<div className="min-h-screen bg-gradient-to-b from-background via-secondary/10 to-background">
       {/* Hero Section */}
       <section className="relative h-[700px] md:h-[750px] bg-gradient-to-br from-primary via-primary to-primary/90 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-15" style={{ backgroundImage: `url(${heroImage})` }}/>
+        <div className="absolute inset-0 bg-cover bg-center opacity-25" style={{ backgroundImage: `url(${heroImage})` }}/>
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/30 to-primary/20"/>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.1),transparent)]"/>
         

@@ -12,13 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import apiClient from '@/lib/axios';
+import client from '@/api/client';
 import { toast } from 'sonner';
-import { useAuth } from '@/context/AuthContext';
+import { useAppSelector } from '@/store/hooks';
+import { selectUser } from '@/store/auth/authSlice';
 import { normalizeProducts, normalizeCategories, normalizeOrders } from '@/lib/adapters';
 import ProductImageManager from '@/components/ProductImageManager';
+
 const PharmacistDashboard = () => {
-    const { user } = useAuth();
+    const user = useAppSelector(selectUser);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [orders, setOrders] = useState([]);
@@ -59,8 +61,8 @@ const PharmacistDashboard = () => {
         setLoading(true);
         try {
             const [productsRes, categoriesRes] = await Promise.all([
-                apiClient.get('/products'),
-                apiClient.get('/categories'),
+                client.get('/api/v1/products'),
+                client.get('/api/v1/categories'),
             ]);
             const productsData = normalizeProducts(productsRes.data);
             const categoriesData = normalizeCategories(categoriesRes.data);
@@ -70,7 +72,7 @@ const PharmacistDashboard = () => {
             let ordersData = [];
             try {
                 // Farmacéuticos y admins ven TODAS las órdenes del sistema
-                const ordersRes = await apiClient.get('/orders/all');
+                const ordersRes = await client.get('/api/v1/orders/all');
                 ordersData = normalizeOrders(ordersRes.data);
                 setOrders(ordersData);
                 console.log('Órdenes cargadas:', ordersData);
@@ -122,7 +124,7 @@ const PharmacistDashboard = () => {
         if (!confirm('¿Estás seguro de eliminar este producto?'))
             return;
         try {
-            await apiClient.delete(`/products/${id}`);
+            await client.delete(`/api/v1/products/${id}`);
             setProducts(products.filter((p) => p.id !== id));
             toast.success('Producto eliminado exitosamente');
         }
@@ -134,7 +136,7 @@ const PharmacistDashboard = () => {
         if (!confirm('¿Estás seguro de eliminar esta categoría?'))
             return;
         try {
-            await apiClient.delete(`/categories/${id}`);
+            await client.delete(`/api/v1/categories/${id}`);
             setCategories(categories.filter((c) => c.id !== id));
             toast.success('Categoría eliminada exitosamente');
         }
@@ -144,7 +146,7 @@ const PharmacistDashboard = () => {
     };
     const handleUpdateOrderStatus = async (orderId, newStatus) => {
         try {
-            await apiClient.put(`/orders/${orderId}/status`, { status: newStatus });
+            await client.put(`/api/v1/orders/${orderId}/status`, { status: newStatus });
             setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
             toast.success('Estado de pedido actualizado');
         }
@@ -193,7 +195,7 @@ const PharmacistDashboard = () => {
                     id: Number(productForm.categoryId),
                 },
             };
-            const response = await apiClient.post('/products', payload);
+            const response = await client.post('/api/v1/products', payload);
             const createdProduct = response.data;
             toast.success('Producto creado exitosamente');
             setNewlyCreatedProductId(createdProduct.id);
@@ -226,7 +228,7 @@ const PharmacistDashboard = () => {
                     id: Number(productForm.categoryId),
                 },
             };
-            await apiClient.put(`/products/${selectedProduct.id}`, payload);
+            await client.put(`/api/v1/products/${selectedProduct.id}`, payload);
             toast.success('Producto actualizado exitosamente');
             setEditProductModalOpen(false);
             setSelectedProduct(null);
@@ -267,7 +269,7 @@ const PharmacistDashboard = () => {
                 name: categoryForm.name.trim(),
                 description: categoryForm.description.trim(),
             };
-            await apiClient.post('/categories', payload);
+            await client.post('/api/v1/categories', payload);
             toast.success('Categoría creada exitosamente');
             setCreateCategoryModalOpen(false);
             fetchData(); // Recargar datos
@@ -291,7 +293,7 @@ const PharmacistDashboard = () => {
                 name: categoryForm.name.trim(),
                 description: categoryForm.description.trim(),
             };
-            await apiClient.put(`/categories/${selectedCategory.id}`, payload);
+            await client.put(`/api/v1/categories/${selectedCategory.id}`, payload);
             toast.success('Categoría actualizada exitosamente');
             setEditCategoryModalOpen(false);
             setSelectedCategory(null);

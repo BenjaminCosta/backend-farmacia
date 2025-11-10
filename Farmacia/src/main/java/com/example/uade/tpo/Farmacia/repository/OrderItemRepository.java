@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface OrderItemRepository extends JpaRepository<OrderItem, Long> { }
-
+public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
+    // Verificar si existe un producto en algún order_item
+    boolean existsByProductId(Long productId);
+}

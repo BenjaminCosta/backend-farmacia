@@ -3,11 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/context/AuthContext';
+import { useAppSelector } from '@/store/hooks';
+import { selectUser } from '@/store/auth/authSlice';
 import { toast } from 'sonner';
 import { User } from 'lucide-react';
+
 const Profile = () => {
-    const { user } = useAuth();
+    const user = useAppSelector(selectUser);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         name: user?.name || '',

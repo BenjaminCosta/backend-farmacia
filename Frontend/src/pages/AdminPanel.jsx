@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
-import apiClient from "@/lib/axios";
+import { useAppSelector } from "@/store/hooks";
+import { selectUser } from "@/store/auth/authSlice";
+import client from "@/api/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
@@ -12,8 +13,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus, Edit, Trash2, Users, Shield, Package } from "lucide-react";
 import Loader from "@/components/Loader";
+
 const AdminPanel = () => {
-    const { user: currentUser } = useAuth();
+    const currentUser = useAppSelector(selectUser);
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [orders, setOrders] = useState([]);
@@ -38,9 +40,9 @@ const AdminPanel = () => {
         try {
             setLoading(true);
             const [usersRes, rolesRes, ordersRes] = await Promise.all([
-                apiClient.get("/admin/users"),
-                apiClient.get("/admin/roles"),
-                apiClient.get("/orders/all"),
+                client.get("/api/v1/admin/users"),
+                client.get("/api/v1/admin/roles"),
+                client.get("/api/v1/orders/all"),
             ]);
             setUsers(usersRes.data);
             setRoles(rolesRes.data);
@@ -60,7 +62,7 @@ const AdminPanel = () => {
             return;
         }
         try {
-            await apiClient.post("/admin/users", {
+            await client.post("/api/v1/admin/users", {
                 ...newUser,
                 roleId: parseInt(newUser.roleId),
             });
@@ -80,7 +82,7 @@ const AdminPanel = () => {
             return;
         }
         try {
-            await apiClient.put(`/admin/users/${selectedUser.id}/role`, {
+            await client.put(`/api/v1/admin/users/${selectedUser.id}/role`, {
                 roleId: parseInt(newUser.roleId),
             });
             toast.success("Rol actualizado exitosamente");
@@ -98,7 +100,7 @@ const AdminPanel = () => {
         if (!selectedUser)
             return;
         try {
-            await apiClient.delete(`/admin/users/${selectedUser.id}`);
+            await client.delete(`/api/v1/admin/users/${selectedUser.id}`);
             toast.success("Usuario eliminado exitosamente");
             setDeleteConfirmOpen(false);
             setSelectedUser(null);

@@ -62,7 +62,11 @@ public class CategoryControllers {
             log.info("POST /categories - Creating category: {}", request.getName());
             CategoryResponse created = categoryService.create(request);
             log.info("Category created with ID: {}", created.id());
-            return ResponseEntity.ok(created);
+            
+            // Retornar 201 Created con Location header y body CategoryResponse
+            return ResponseEntity
+                .created(java.net.URI.create("/api/v1/categories/" + created.id()))
+                .body(created);
         } catch (Exception ex) {
             log.error("Error creating category: {}", ex.getMessage());
             throw ex;
@@ -75,6 +79,8 @@ public class CategoryControllers {
         try {
             log.info("PUT /categories/{} - Updating category", id);
             CategoryResponse updated = categoryService.update(id, request);
+            
+            // Retornar 200 OK con CategoryResponse actualizado
             return ResponseEntity.ok(updated);
         } catch (Exception ex) {
             log.error("Error updating category {}: {}", id, ex.getMessage());
@@ -88,10 +94,12 @@ public class CategoryControllers {
         try {
             log.info("DELETE /categories/{}", id);
             categoryService.delete(id);
+            
+            // Retornar 204 No Content si elimina exitosamente
             return ResponseEntity.noContent().build();
         } catch (Exception ex) {
             log.error("Error deleting category {}: {}", id, ex.getMessage());
-            throw ex;
+            throw ex; // GlobalExceptionHandler manejará ConflictException como 409
         }
     }
 }
