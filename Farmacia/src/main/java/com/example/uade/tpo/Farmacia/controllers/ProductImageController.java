@@ -21,16 +21,17 @@ public class ProductImageController {
 
     /**
      * Subir múltiples imágenes para un producto
+     * Acepta multipart/form-data con múltiples archivos
      * Solo PHARMACIST o ADMIN
      */
     @PostMapping("/products/{productId}/images")
     @PreAuthorize("hasAnyRole('PHARMACIST', 'ADMIN')")
     public ResponseEntity<List<ProductImageMetadataDTO>> uploadImages(
         @PathVariable Long productId,
-        @RequestParam("files") MultipartFile[] files
+        @RequestParam("files") MultipartFile[] files // acepta múltiples archivos
     ) throws IOException {
         List<ProductImageMetadataDTO> results = productImageService.uploadImages(productId, files);
-        return ResponseEntity.status(HttpStatus.CREATED).body(results);
+        return ResponseEntity.status(HttpStatus.CREATED).body(results); // 201 Created
     }
 
     /**
@@ -47,6 +48,7 @@ public class ProductImageController {
 
     /**
      * Eliminar una imagen
+     * Si era la imagen primary, automáticamente promueve la siguiente
      * Solo PHARMACIST o ADMIN
      */
     @DeleteMapping("/products/{productId}/images/{imageId}")
@@ -56,11 +58,12 @@ public class ProductImageController {
         @PathVariable Long imageId
     ) {
         productImageService.deleteImage(imageId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 
     /**
      * Marcar imagen como principal
+     * Desmarca automáticamente la anterior imagen primary
      * Solo PHARMACIST o ADMIN
      */
     @PutMapping("/products/{productId}/images/{imageId}/primary")
@@ -70,11 +73,12 @@ public class ProductImageController {
         @PathVariable Long imageId
     ) {
         productImageService.setImageAsPrimary(imageId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().build(); // 200 OK
     }
 
     /**
      * Reemplazar una imagen existente
+     * Mantiene el ID pero actualiza el contenido
      * Solo PHARMACIST o ADMIN
      */
     @PutMapping("/products/{productId}/images/{imageId}")
@@ -82,9 +86,9 @@ public class ProductImageController {
     public ResponseEntity<ProductImageMetadataDTO> replaceImage(
         @PathVariable Long productId,
         @PathVariable Long imageId,
-        @RequestParam("file") MultipartFile file
+        @RequestParam("file") MultipartFile file // un solo archivo
     ) throws IOException {
         ProductImageMetadataDTO result = productImageService.replaceImage(imageId, file);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(result); // 200 OK con nuevos metadatos
     }
 }

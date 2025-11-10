@@ -1,5 +1,6 @@
 package com.example.uade.tpo.Farmacia.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ public class Role {
 
     private String description;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private Set<User> users;
     

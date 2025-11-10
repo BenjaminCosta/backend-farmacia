@@ -9,4 +9,5 @@ public interface RoleService {
     Role saveRole(Role role);
     List<Role> getAllRoles();
     Optional<Role> getRoleByName(String name);
+    void deleteRole(Long id);
 }

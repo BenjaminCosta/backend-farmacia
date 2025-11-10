@@ -29,8 +29,9 @@ import java.util.Optional;
 @Slf4j
 public class ProductImageServiceImpl implements ProductImageService {
 
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-    private static final int MAX_IMAGES_PER_PRODUCT = 10;
+    // Límites de seguridad
+    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB máximo por imagen
+    private static final int MAX_IMAGES_PER_PRODUCT = 10; // máximo 10 imágenes por producto
     private static final List<String> ALLOWED_MIME_TYPES = Arrays.asList(
         "image/jpeg", "image/png", "image/webp"
     );
@@ -52,22 +53,22 @@ public class ProductImageServiceImpl implements ProductImageService {
         }
 
         List<ProductImageMetadataDTO> results = new ArrayList<>();
-        boolean isFirstImage = currentCount == 0;
+        boolean isFirstImage = currentCount == 0; // la primera imagen será la primary
 
         for (MultipartFile file : files) {
-            validateFile(file);
+            validateFile(file); // valida tamaño, tipo y contenido
             
             byte[] bytes = file.getBytes();
             String sha256 = calculateSHA256(bytes);
             
-            // Deduplicar por sha256
+            // Deduplicar: si ya existe esta imagen (mismo hash), skip
             Optional<ProductImage> existing = productImageRepository.findByProductIdAndSha256(productId, sha256);
             if (existing.isPresent()) {
                 log.info("Imagen duplicada detectada para producto {}, sha256: {}", productId, sha256);
                 continue;
             }
             
-            // Leer dimensiones
+            // Extraer dimensiones usando ImageIO
             BufferedImage img = ImageIO.read(new ByteArrayInputStream(bytes));
             if (img == null) {
                 throw new RuntimeException("No se pudo leer la imagen");
@@ -81,7 +82,7 @@ public class ProductImageServiceImpl implements ProductImageService {
             productImage.setHeight(img.getHeight());
             productImage.setSizeBytes((long) bytes.length);
             productImage.setSha256(sha256);
-            productImage.setIsPrimary(isFirstImage && results.isEmpty());
+            productImage.setIsPrimary(isFirstImage && results.isEmpty()); // auto-primary si es la primera
             
             productImage = productImageRepository.save(productImage);
             
@@ -112,7 +113,7 @@ public class ProductImageServiceImpl implements ProductImageService {
         
         productImageRepository.delete(image);
         
-        // Si era primary, asignar otra como primary
+        // Si borramos la imagen primary, promover la siguiente
         if (wasPrimary) {
             List<ProductImage> remaining = productImageRepository.findByProductIdOrderByIsPrimaryDescCreatedAtAsc(productId);
             if (!remaining.isEmpty()) {
@@ -128,10 +129,10 @@ public class ProductImageServiceImpl implements ProductImageService {
     public void setImageAsPrimary(Long imageId) {
         ProductImage image = getImageById(imageId);
         
-        // Limpiar primary anterior
+        // Desmarcar la imagen primary actual del producto
         productImageRepository.clearPrimaryForProduct(image.getProductId());
         
-        // Marcar como primary
+        // Marcar esta imagen como primary
         image.setIsPrimary(true);
         productImageRepository.save(image);
     }
@@ -165,6 +166,7 @@ public class ProductImageServiceImpl implements ProductImageService {
     public byte[] getResizedImage(Long imageId, Integer targetWidth) throws IOException {
         ProductImage image = getImageById(imageId);
         
+        // Si no se pide resize o ya es más chica, devolver original
         if (targetWidth == null || targetWidth >= image.getWidth()) {
             return image.getBytes();
         }
@@ -174,15 +176,18 @@ public class ProductImageServiceImpl implements ProductImageService {
             return image.getBytes();
         }
         
+        // Calcular nuevo alto manteniendo aspect ratio
         int newWidth = targetWidth;
         int newHeight = (int) ((double) targetWidth / original.getWidth() * original.getHeight());
         
+        // Resize con interpolación bilinear para calidad
         BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = resized.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g.drawImage(original, 0, 0, newWidth, newHeight, null);
         g.dispose();
         
+        // Convertir de vuelta a bytes en el formato original
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         String format = image.getMimeType().substring(6); // "image/jpeg" -> "jpeg"
         if (format.equals("jpg")) format = "jpeg";
@@ -205,6 +210,7 @@ public class ProductImageServiceImpl implements ProductImageService {
         }
     }
 
+    // Calcular hash SHA-256 para deduplicación y ETags
     private String calculateSHA256(byte[] bytes) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
