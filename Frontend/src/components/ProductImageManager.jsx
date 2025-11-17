@@ -37,7 +37,7 @@ const ProductImageManager = ({ productId }) => {
 
   const handleSetPrimary = async (imageId) => {
     try {
-      await setProductImagePrimaryMutation({ productId, imageId }).unwrap();
+      await setProductImagePrimary({ productId, imageId }).unwrap();
     } catch (error) {
       console.error('Error marcando como principal:', error);
     }

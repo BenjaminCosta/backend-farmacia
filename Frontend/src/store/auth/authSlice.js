@@ -3,7 +3,7 @@ import { cookieStorage } from '../../lib/cookieStorage';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4002';
 
-// Cargar token desde cookies (NO localStorage según reglas)
+// Cargar token desde cookies
 const loadTokenFromStorage = () => {
   try {
     const token = cookieStorage.getItem('authToken');
@@ -14,7 +14,7 @@ const loadTokenFromStorage = () => {
   }
 };
 
-// Guardar token en cookies (NO localStorage según reglas)
+// Guardar token en cookies 
 const saveTokenToStorage = (token) => {
   try {
     if (token) {
@@ -39,21 +39,17 @@ const initialState = {
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${API_URL}/api/v1/auth/authenticate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials),
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        return rejectWithValue(error.message || 'Error al iniciar sesión');
-      }
-      return await response.json(); // { token, user }
-    } catch (error) {
-      return rejectWithValue('Error al iniciar sesión');
+    const response = await fetch(`${API_URL}/api/v1/auth/authenticate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return rejectWithValue(error.message || 'Error al iniciar sesión');
     }
+    return await response.json(); // { token, user }
   }
 );
 
@@ -61,21 +57,17 @@ export const login = createAsyncThunk(
 export const register = createAsyncThunk(
   'auth/register',
   async ({ email, password, name }, { rejectWithValue }) => {
-    try {
-      const response = await fetch(`${API_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        return rejectWithValue(error.message || 'Error al registrarse');
-      }
-      return await response.json(); // { token, user }
-    } catch (error) {
-      return rejectWithValue('Error al registrarse');
+    const response = await fetch(`${API_URL}/api/v1/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, name }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return rejectWithValue(error.message || 'Error al registrarse');
     }
+    return await response.json(); // { token, user }
   }
 );
 
@@ -83,24 +75,20 @@ export const register = createAsyncThunk(
 export const me = createAsyncThunk(
   'auth/me',
   async (_, { getState, rejectWithValue }) => {
-    try {
-      const token = getState().auth.token;
-      const response = await fetch(`${API_URL}/api/v1/auth/me`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        credentials: 'include',
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        return rejectWithValue(error.message || 'Error al obtener usuario');
-      }
-      return await response.json(); // user
-    } catch (error) {
-      return rejectWithValue('Error al obtener usuario');
+    const token = getState().auth.token;
+    const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return rejectWithValue(error.message || 'Error al obtener usuario');
     }
+    return await response.json(); // user
   }
 );
 

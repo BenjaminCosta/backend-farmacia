@@ -79,7 +79,7 @@ export const productsApi = api.injectEndpoints({
       query: ({ productId, files }) => {
         const formData = new FormData();
         files.forEach((file) => {
-          formData.append('images', file);
+          formData.append('files', file);
         });
 
         return {

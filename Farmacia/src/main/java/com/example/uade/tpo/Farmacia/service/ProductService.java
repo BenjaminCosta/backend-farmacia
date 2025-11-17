@@ -202,6 +202,11 @@ public class ProductService {
         db.setDescuento(p.getDescuento());
       }
       
+      // Actualizar requiresPrescription
+      if (p.getRequiresPrescription() != null) {
+        db.setRequiresPrescription(p.getRequiresPrescription());
+      }
+      
       // Validar y actualizar categoría si se proporciona
       if (p.getCategory() != null && p.getCategory().getId() != null) {
         Category category = categories.findById(p.getCategory().getId())

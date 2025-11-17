@@ -155,7 +155,7 @@ const PharmacistDashboard = () => {
         setSelectedProduct(product);
         setProductForm({
             nombre: product.name,
-            descripcion: '', // Si tienes descripción en el Product, úsala aquí
+            descripcion: product.description || '',
             precio: product.price.toString(),
             stock: (product.stock || 0).toString(),
             descuento: '0', // Si tienes descuento en el Product, úsalo aquí

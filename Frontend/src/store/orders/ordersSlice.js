@@ -15,25 +15,21 @@ const initialState = {
 export const createOrder = createAsyncThunk(
   'orders/createOrder',
   async (orderData, { getState, rejectWithValue }) => {
-    try {
-      const token = getState().auth.token;
-      const response = await fetch(`${API_URL}/api/v1/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        credentials: 'include',
-        body: JSON.stringify(orderData),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        return rejectWithValue(error.message || 'Error al crear la orden');
-      }
-      return await response.json(); // OrderSummaryDTO completo
-    } catch (error) {
-      return rejectWithValue('Error al crear la orden');
+    const token = getState().auth.token;
+    const response = await fetch(`${API_URL}/api/v1/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` }),
+      },
+      credentials: 'include',
+      body: JSON.stringify(orderData),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      return rejectWithValue(error.message || 'Error al crear la orden');
     }
+    return await response.json(); // OrderSummaryDTO completo
   }
 );
 
