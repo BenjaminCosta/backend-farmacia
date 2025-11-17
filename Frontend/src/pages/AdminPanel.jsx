@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAppSelector } from "@/store/hooks";
 import { selectUser } from "@/store/auth/authSlice";
-import client from "@/api/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
@@ -11,15 +10,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus, Edit, Trash2, Users, Shield, Package } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { UserPlus, Edit, Trash2, Users, Shield, Package, UserCog, ShoppingCart, TrendingUp } from "lucide-react";
 import Loader from "@/components/Loader";
+import { formatPrice } from "@/lib/formatPrice";
+import { useGetUsersQuery, useGetRolesQuery, useCreateUserMutation, useUpdateUserRoleMutation, useDeleteUserMutation } from "@/services/admin";
+import { useGetAllOrdersQuery } from "@/services/orders";
 
 const AdminPanel = () => {
     const currentUser = useAppSelector(selectUser);
-    const [users, setUsers] = useState([]);
-    const [roles, setRoles] = useState([]);
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
+    
+    const { data: users = [], isLoading: usersLoading } = useGetUsersQuery();
+    const { data: roles = [], isLoading: rolesLoading } = useGetRolesQuery();
+    const { data: orders = [], isLoading: ordersLoading } = useGetAllOrdersQuery();
+    
+    const [createUser] = useCreateUserMutation();
+    const [updateUserRole] = useUpdateUserRoleMutation();
+    const [deleteUser] = useDeleteUserMutation();
+    
+    const loading = usersLoading || rolesLoading || ordersLoading;
+    
     const [createModalOpen, setCreateModalOpen] = useState(false);
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -31,48 +41,22 @@ const AdminPanel = () => {
         password: "",
         roleId: "",
     });
-    useEffect(() => {
-        if (currentUser?.role === "ADMIN") {
-            fetchData();
-        }
-    }, [currentUser]);
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const [usersRes, rolesRes, ordersRes] = await Promise.all([
-                client.get("/api/v1/admin/users"),
-                client.get("/api/v1/admin/roles"),
-                client.get("/api/v1/orders/all"),
-            ]);
-            setUsers(usersRes.data);
-            setRoles(rolesRes.data);
-            setOrders(ordersRes.data);
-        }
-        catch (error) {
-            console.error("Error fetching data:", error);
-            toast.error("Error al cargar datos");
-        }
-        finally {
-            setLoading(false);
-        }
-    };
     const handleCreateUser = async () => {
         if (!newUser.email || !newUser.name || !newUser.password || !newUser.roleId) {
             toast.error("Todos los campos son obligatorios");
             return;
         }
         try {
-            await client.post("/api/v1/admin/users", {
+            await createUser({
                 ...newUser,
                 roleId: parseInt(newUser.roleId),
-            });
+            }).unwrap();
             toast.success("Usuario creado exitosamente");
             setCreateModalOpen(false);
             setNewUser({ email: "", name: "", password: "", roleId: "" });
-            fetchData();
         }
         catch (error) {
-            const message = error.response?.data?.message || "Error al crear usuario";
+            const message = error.data?.message || "Error al crear usuario";
             toast.error(message);
         }
     };
@@ -82,17 +66,17 @@ const AdminPanel = () => {
             return;
         }
         try {
-            await client.put(`/api/v1/admin/users/${selectedUser.id}/role`, {
+            await updateUserRole({
+                id: selectedUser.id,
                 roleId: parseInt(newUser.roleId),
-            });
+            }).unwrap();
             toast.success("Rol actualizado exitosamente");
             setEditModalOpen(false);
             setSelectedUser(null);
             setNewUser({ email: "", name: "", password: "", roleId: "" });
-            fetchData();
         }
         catch (error) {
-            const message = error.response?.data?.message || "Error al actualizar rol";
+            const message = error.data?.message || "Error al actualizar rol";
             toast.error(message);
         }
     };
@@ -100,14 +84,13 @@ const AdminPanel = () => {
         if (!selectedUser)
             return;
         try {
-            await client.delete(`/api/v1/admin/users/${selectedUser.id}`);
+            await deleteUser(selectedUser.id).unwrap();
             toast.success("Usuario eliminado exitosamente");
             setDeleteConfirmOpen(false);
             setSelectedUser(null);
-            fetchData();
         }
         catch (error) {
-            const message = error.response?.data?.message || "Error al eliminar usuario";
+            const message = error.data?.message || "Error al eliminar usuario";
             toast.error(message);
         }
     };
@@ -149,38 +132,112 @@ const AdminPanel = () => {
                 return "bg-gray-100 text-gray-800";
         }
     };
-    return (<div className="container mx-auto py-8 px-4 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
-        <p className="text-gray-600">Gestiona usuarios, roles y visualiza todas las órdenes del sistema</p>
-      </div>
+    return (<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <div className="container mx-auto py-8 px-4">
+        {/* Header Mejorado */}
+        <div className="mb-8 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-purple-500/10 rounded-2xl blur-3xl -z-10" />
+          <div className="bg-white/80 backdrop-blur-sm border-2 border-red-500/20 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-gradient-to-br from-red-500 to-purple-600 rounded-2xl shadow-lg">
+                  <Shield className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-red-500 to-purple-600 bg-clip-text text-transparent">
+                    Panel de Administración
+                  </h1>
+                  <p className="text-muted-foreground mt-1 font-medium">
+                    🔐 Gestiona usuarios, roles y visualiza todas las órdenes del sistema
+                  </p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Admin actual</p>
+                  <p className="text-sm font-semibold">{currentUser?.name || currentUser?.email}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="users">
-            <Users className="mr-2 h-4 w-4"/>
-            Usuarios
-          </TabsTrigger>
-          <TabsTrigger value="roles">
-            <Shield className="mr-2 h-4 w-4"/>
-            Roles
-          </TabsTrigger>
-          <TabsTrigger value="orders">
-            <Package className="mr-2 h-4 w-4"/>
-            Todas las Órdenes
-          </TabsTrigger>
-        </TabsList>
+        {/* Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-blue-900">Total Usuarios</CardTitle>
+              <div className="p-2 bg-blue-600 rounded-xl shadow-md">
+                <Users className="h-5 w-5 text-white"/>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-900">{users.length}</div>
+              <p className="text-xs text-blue-700 font-medium mt-1">En el sistema</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-purple-900">Roles Activos</CardTitle>
+              <div className="p-2 bg-purple-600 rounded-xl shadow-md">
+                <Shield className="h-5 w-5 text-white"/>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-900">{roles.length}</div>
+              <p className="text-xs text-purple-700 font-medium mt-1">Tipos de usuario</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-semibold text-green-900">Total Órdenes</CardTitle>
+              <div className="p-2 bg-green-600 rounded-xl shadow-md">
+                <ShoppingCart className="h-5 w-5 text-white"/>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-900">{orders.length}</div>
+              <p className="text-xs text-green-700 font-medium mt-1">En el sistema</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        <Tabs defaultValue="users" className="w-full space-y-4">
+          <TabsList className="bg-gradient-to-r from-red-500/10 to-purple-500/10 border-2 border-red-500/20 p-1">
+            <TabsTrigger value="users" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <Users className="mr-2 h-4 w-4"/>
+              Usuarios
+            </TabsTrigger>
+            <TabsTrigger value="roles" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <Shield className="mr-2 h-4 w-4"/>
+              Roles
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <Package className="mr-2 h-4 w-4"/>
+              Todas las Órdenes
+            </TabsTrigger>
+          </TabsList>
 
         {/* TAB: USUARIOS */}
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-blue-100 border-b-2 border-blue-200">
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Gestión de Usuarios</CardTitle>
-                  <CardDescription>Crear, editar y eliminar usuarios del sistema</CardDescription>
+                  <CardTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
+                    <UserCog className="h-6 w-6" />
+                    Gestión de Usuarios
+                  </CardTitle>
+                  <CardDescription className="text-blue-700 font-medium">
+                    Crear, editar y eliminar usuarios del sistema
+                  </CardDescription>
                 </div>
-                <Button onClick={() => setCreateModalOpen(true)}>
+                <Button 
+                  onClick={() => setCreateModalOpen(true)}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-md hover:shadow-lg transition-all"
+                >
                   <UserPlus className="mr-2 h-4 w-4"/>
                   Crear Usuario
                 </Button>
@@ -203,17 +260,30 @@ const AdminPanel = () => {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.name}</TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getRoleBadgeColor(user.role.name)}`}>
+                        <Badge className={getRoleBadgeColor(user.role.name)}>
                           {user.role.name}
-                        </span>
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" onClick={() => openEditModal(user)}>
-                          <Edit className="h-4 w-4"/>
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => openDeleteConfirm(user)} disabled={user.email === currentUser?.email}>
-                          <Trash2 className="h-4 w-4 text-red-600"/>
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => openEditModal(user)}
+                            className="hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                          >
+                            <Edit className="h-4 w-4"/>
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => openDeleteConfirm(user)}
+                            className="hover:bg-red-100 hover:text-red-600 transition-colors"
+                            disabled={user.id === currentUser?.id}
+                          >
+                            <Trash2 className="h-4 w-4"/>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>))}
                 </TableBody>
@@ -224,21 +294,41 @@ const AdminPanel = () => {
 
         {/* TAB: ROLES */}
         <TabsContent value="roles">
-          <Card>
-            <CardHeader>
-              <CardTitle>Roles del Sistema</CardTitle>
-              <CardDescription>Visualiza todos los roles disponibles</CardDescription>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-purple-50 to-purple-100 border-b-2 border-purple-200">
+              <CardTitle className="text-2xl font-bold text-purple-900 flex items-center gap-2">
+                <Shield className="h-6 w-6" />
+                Roles del Sistema
+              </CardTitle>
+              <CardDescription className="text-purple-700 font-medium">
+                Visualiza todos los roles disponibles
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {roles.map((role) => (<Card key={role.id}>
-                    <CardHeader>
-                      <CardTitle className="text-lg">{role.name}</CardTitle>
+                {roles.map((role) => (
+                  <Card key={role.id} className="border-2 hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <CardHeader className={`${
+                      role.name === 'ADMIN' ? 'bg-red-50 border-b-2 border-red-200' :
+                      role.name === 'PHARMACIST' ? 'bg-blue-50 border-b-2 border-blue-200' :
+                      'bg-green-50 border-b-2 border-green-200'
+                    }`}>
+                      <CardTitle className={`text-lg flex items-center gap-2 ${
+                        role.name === 'ADMIN' ? 'text-red-900' :
+                        role.name === 'PHARMACIST' ? 'text-blue-900' :
+                        'text-green-900'
+                      }`}>
+                        {role.name === 'ADMIN' && <Shield className="h-5 w-5" />}
+                        {role.name === 'PHARMACIST' && <UserCog className="h-5 w-5" />}
+                        {role.name === 'USER' && <Users className="h-5 w-5" />}
+                        {role.name}
+                      </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-4">
                       <p className="text-sm text-gray-600">{role.description}</p>
                     </CardContent>
-                  </Card>))}
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -246,34 +336,48 @@ const AdminPanel = () => {
 
         {/* TAB: TODAS LAS ÓRDENES */}
         <TabsContent value="orders">
-          <Card>
-            <CardHeader>
-              <CardTitle>Todas las Órdenes</CardTitle>
-              <CardDescription>Vista completa de todas las órdenes en el sistema</CardDescription>
+          <Card className="border-2 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b-2 border-green-200">
+              <CardTitle className="text-2xl font-bold text-green-900 flex items-center gap-2">
+                <ShoppingCart className="h-6 w-6" />
+                Todas las Órdenes
+              </CardTitle>
+              <CardDescription className="text-green-700 font-medium">
+                Vista completa de todas las órdenes en el sistema
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Cliente</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Fecha</TableHead>
+                  <TableRow className="border-b-2">
+                    <TableHead className="font-bold">ID</TableHead>
+                    <TableHead className="font-bold">Cliente</TableHead>
+                    <TableHead className="font-bold">Total</TableHead>
+                    <TableHead className="font-bold">Estado</TableHead>
+                    <TableHead className="font-bold">Fecha</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((order) => (<TableRow key={order.id}>
-                      <TableCell>#{order.id}</TableCell>
+                  {orders.map((order) => (
+                    <TableRow key={order.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="font-medium">#{order.id}</TableCell>
                       <TableCell>{order.fullName}</TableCell>
-                      <TableCell>${order.total.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusBadgeColor(order.status)}`}>
-                          {order.status}
-                        </span>
+                      <TableCell className="font-semibold text-green-600">
+                        {formatPrice(order.total)}
                       </TableCell>
-                      <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                    </TableRow>))}
+                      <TableCell>
+                        <Badge 
+                          variant="outline" 
+                          className={`${getStatusBadgeColor(order.status)} font-semibold`}
+                        >
+                          {order.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </CardContent>
@@ -379,6 +483,9 @@ const AdminPanel = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>);
+      </div>
+    </div>
+  );
 };
+
 export default AdminPanel;

@@ -13,25 +13,54 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import client from '@/api/client';
 import { toast } from 'sonner';
 import { useAppSelector } from '@/store/hooks';
 import { selectUser } from '@/store/auth/authSlice';
-import { normalizeProducts, normalizeCategories, normalizeOrders } from '@/lib/adapters';
 import ProductImageManager from '@/components/ProductImageManager';
+import { 
+    useGetProductsQuery, 
+    useCreateProductMutation, 
+    useUpdateProductMutation, 
+    useDeleteProductMutation 
+} from '@/services/products';
+import { 
+    useGetCategoriesQuery, 
+    useCreateCategoryMutation, 
+    useUpdateCategoryMutation, 
+    useDeleteCategoryMutation 
+} from '@/services/categories';
+import { 
+    useGetAllOrdersQuery, 
+    useUpdateOrderStatusMutation, 
+    useMarkPickupCompleteMutation 
+} from '@/services/orders';
 
 const PharmacistDashboard = () => {
     const user = useAppSelector(selectUser);
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [orders, setOrders] = useState([]);
-    const [stats, setStats] = useState({
-        totalProducts: 0,
-        lowStockProducts: 0,
-        pendingOrders: 0,
-        totalRevenue: 0,
-    });
-    const [loading, setLoading] = useState(true);
+    
+    // RTK Query hooks
+    const { data: products = [], isLoading: productsLoading } = useGetProductsQuery();
+    const { data: categories = [], isLoading: categoriesLoading } = useGetCategoriesQuery();
+    const { data: orders = [], isLoading: ordersLoading } = useGetAllOrdersQuery();
+    
+    const [deleteProduct] = useDeleteProductMutation();
+    const [deleteCategory] = useDeleteCategoryMutation();
+    const [updateOrderStatus] = useUpdateOrderStatusMutation();
+    const [markPickupComplete] = useMarkPickupCompleteMutation();
+    const [createProduct] = useCreateProductMutation();
+    const [updateProduct] = useUpdateProductMutation();
+    const [createCategory] = useCreateCategoryMutation();
+    const [updateCategory] = useUpdateCategoryMutation();
+    
+    const loading = productsLoading || categoriesLoading || ordersLoading;
+    
+    // Calcular estadísticas
+    const stats = {
+        totalProducts: products.length,
+        lowStockProducts: products.filter((p) => (p.stock || 0) < 10).length,
+        pendingOrders: orders.filter((o) => o.status === 'PENDING').length,
+        totalRevenue: orders.reduce((sum, o) => sum + (o.total || 0), 0),
+    };
     // Estados para modales de productos
     const [createProductModalOpen, setCreateProductModalOpen] = useState(false);
     const [editProductModalOpen, setEditProductModalOpen] = useState(false);
@@ -56,99 +85,35 @@ const PharmacistDashboard = () => {
         name: '',
         description: '',
     });
-    useEffect(() => {
-        fetchData();
-    }, []);
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const [productsRes, categoriesRes] = await Promise.all([
-                client.get('/api/v1/products'),
-                client.get('/api/v1/categories'),
-            ]);
-            const productsData = normalizeProducts(productsRes.data);
-            const categoriesData = normalizeCategories(categoriesRes.data);
-            setProducts(productsData);
-            setCategories(categoriesData);
-            // Solo intentar cargar pedidos si el usuario es ADMIN o PHARMACIST
-            let ordersData = [];
-            try {
-                // Farmacéuticos y admins ven TODAS las órdenes del sistema
-                const ordersRes = await client.get('/api/v1/orders/all');
-                ordersData = normalizeOrders(ordersRes.data);
-                setOrders(ordersData);
-                console.log('Órdenes cargadas:', ordersData);
-            }
-            catch (error) {
-                console.log('No se pudieron cargar los pedidos:', error);
-                setOrders([]);
-            }
-            // Calcular estadísticas
-            const lowStock = productsData.filter((p) => (p.stock || 0) < 10).length;
-            const pending = ordersData.filter((o) => o.status === 'PENDING').length;
-            const revenue = ordersData.reduce((sum, o) => sum + (o.total || 0), 0);
-            setStats({
-                totalProducts: productsData.length,
-                lowStockProducts: lowStock,
-                pendingOrders: pending,
-                totalRevenue: revenue,
-            });
-        }
-        catch (error) {
-            console.error('Error fetching data:', error);
-            toast.error('Error al cargar los datos');
-            // Mock data para desarrollo
-            setProducts([
-                { id: '1', name: 'Ibuprofeno 400mg', price: 250000, stock: 50 },
-                { id: '2', name: 'Vitamina C 1000mg', price: 180000, stock: 5 },
-                { id: '3', name: 'Paracetamol 500mg', price: 150000, stock: 30 },
-            ]);
-            setCategories([
-                { id: '1', name: 'Medicamentos', description: 'Productos farmacéuticos' },
-                { id: '2', name: 'Bienestar', description: 'Vitaminas y suplementos' },
-            ]);
-            setOrders([
-                { id: '1', userId: '1', status: 'PENDING', total: 500000, createdAt: '2025-10-17' },
-                { id: '2', userId: '2', status: 'COMPLETED', total: 300000, createdAt: '2025-10-16' },
-            ]);
-            setStats({
-                totalProducts: 3,
-                lowStockProducts: 1,
-                pendingOrders: 1,
-                totalRevenue: 800000,
-            });
-        }
-        finally {
-            setLoading(false);
-        }
-    };
+    
+    // Handlers con RTK Query mutations
     const handleDeleteProduct = async (id) => {
         if (!confirm('¿Estás seguro de eliminar este producto?'))
             return;
         try {
-            await client.delete(`/api/v1/products/${id}`);
-            setProducts(products.filter((p) => p.id !== id));
+            await deleteProduct(id).unwrap();
             toast.success('Producto eliminado exitosamente');
         }
         catch (error) {
             toast.error('Error al eliminar producto');
         }
     };
+    
     const handleDeleteCategory = async (id) => {
         if (!confirm('¿Estás seguro de eliminar esta categoría?'))
             return;
         try {
-            await client.delete(`/api/v1/categories/${id}`);
-            setCategories(categories.filter((c) => c.id !== id));
+            await deleteCategory(id).unwrap();
             toast.success('Categoría eliminada exitosamente');
         }
         catch (error) {
             toast.error('Error al eliminar categoría');
         }
     };
+    
     const handleUpdateOrderStatus = async (orderId, newStatus) => {
         try {
-            await client.put(`/api/v1/orders/${orderId}/status`, { status: newStatus });
+            await updateOrderStatus({ orderId, status: newStatus }).unwrap();
             setOrders(orders.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
             toast.success('Estado de pedido actualizado');
         }
@@ -160,22 +125,16 @@ const PharmacistDashboard = () => {
     // 🔴 Nuevo handler para marcar pickup completado (productos RX)
     const handleMarkPickupComplete = async (orderId) => {
         try {
-            const response = await client.put(`/api/v1/orders/${orderId}/pickup/complete`);
-            const completedOrder = response.data;
-            
-            // Actualizar la orden localmente
-            setOrders(orders.map(o => o.id === orderId ? { ...o, status: 'COMPLETED' } : o));
+            const completedOrder = await markPickupComplete(orderId).unwrap();
             
             toast.success(
                 completedOrder.requiresPrescription 
                     ? '✅ Entrega RX completada: medicamento entregado al cliente'
                     : '✅ Retiro completado exitosamente'
             );
-            
-            fetchData(); // Refrescar datos
         } catch (error) {
             console.error('Error al completar pickup:', error);
-            toast.error(error.response?.data?.message || 'Error al completar el retiro');
+            toast.error(error.data?.message || 'Error al completar el retiro');
         }
     };
     
@@ -223,20 +182,14 @@ const PharmacistDashboard = () => {
                     id: Number(productForm.categoryId),
                 },
             };
-            const response = await client.post('/api/v1/products', payload);
-            const createdProduct = response.data;
+            const createdProduct = await createProduct(payload).unwrap();
             toast.success('Producto creado exitosamente');
             setNewlyCreatedProductId(createdProduct.id);
             // No cerrar el modal, mostrar gestor de imágenes
-            // setCreateProductModalOpen(false);
-            // fetchData(); // Recargar datos después de subir imágenes
         }
         catch (error) {
             console.error('Error creating product:', error);
-            const errorMessage = error && typeof error === 'object' && 'response' in error
-                ? error.response?.data?.message
-                : undefined;
-            toast.error(errorMessage || 'Error al crear producto');
+            toast.error(error.data?.message || 'Error al crear producto');
         }
     };
     const handleUpdateProduct = async (e) => {
@@ -257,18 +210,14 @@ const PharmacistDashboard = () => {
                     id: Number(productForm.categoryId),
                 },
             };
-            await client.put(`/api/v1/products/${selectedProduct.id}`, payload);
+            await updateProduct({ id: selectedProduct.id, ...payload }).unwrap();
             toast.success('Producto actualizado exitosamente');
             setEditProductModalOpen(false);
             setSelectedProduct(null);
-            fetchData(); // Recargar datos
         }
         catch (error) {
             console.error('Error updating product:', error);
-            const errorMessage = error && typeof error === 'object' && 'response' in error
-                ? error.response?.data?.message
-                : undefined;
-            toast.error(errorMessage || 'Error al actualizar producto');
+            toast.error(error.data?.message || 'Error al actualizar producto');
         }
     };
     // ====== FUNCIONES DE CATEGORÍAS ======
@@ -298,19 +247,16 @@ const PharmacistDashboard = () => {
                 name: categoryForm.name.trim(),
                 description: categoryForm.description.trim(),
             };
-            await client.post('/api/v1/categories', payload);
+            await createCategory(payload).unwrap();
             toast.success('Categoría creada exitosamente');
             setCreateCategoryModalOpen(false);
-            fetchData(); // Recargar datos
         }
         catch (error) {
             console.error('Error creating category:', error);
-            const errorMessage = error && typeof error === 'object' && 'response' in error
-                ? error.response?.data?.message
-                : undefined;
-            toast.error(errorMessage || 'Error al crear categoría');
+            toast.error(error.data?.message || 'Error al crear categoría');
         }
     };
+    
     const handleUpdateCategory = async (e) => {
         e.preventDefault();
         if (!selectedCategory || !categoryForm.name) {
@@ -322,18 +268,14 @@ const PharmacistDashboard = () => {
                 name: categoryForm.name.trim(),
                 description: categoryForm.description.trim(),
             };
-            await client.put(`/api/v1/categories/${selectedCategory.id}`, payload);
+            await updateCategory({ id: selectedCategory.id, ...payload }).unwrap();
             toast.success('Categoría actualizada exitosamente');
             setEditCategoryModalOpen(false);
             setSelectedCategory(null);
-            fetchData(); // Recargar datos
         }
         catch (error) {
             console.error('Error updating category:', error);
-            const errorMessage = error && typeof error === 'object' && 'response' in error
-                ? error.response?.data?.message
-                : undefined;
-            toast.error(errorMessage || 'Error al actualizar categoría');
+            toast.error(error.data?.message || 'Error al actualizar categoría');
         }
     };
     const getStatusBadge = (status) => {
@@ -349,97 +291,145 @@ const PharmacistDashboard = () => {
     if (loading) {
         return <Loader />;
     }
-    return (<div className="min-h-screen bg-background">
+    return (<div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Panel de Farmacéutico</h1>
-          <p className="text-muted-foreground">
-            Bienvenido, {user?.name || user?.email}
-          </p>
+        {/* Header Mejorado */}
+        <div className="mb-8 relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-emerald-500/10 rounded-2xl blur-3xl -z-10" />
+          <div className="bg-white/80 backdrop-blur-sm border-2 border-primary/20 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-4 bg-gradient-to-br from-primary to-emerald-600 rounded-2xl shadow-lg">
+                  <Pill className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-emerald-600 bg-clip-text text-transparent">
+                    Panel de Farmacéutico
+                  </h1>
+                  <p className="text-muted-foreground mt-1 font-medium">
+                    👋 Bienvenido, {user?.name || user?.email}
+                  </p>
+                </div>
+              </div>
+              <div className="hidden md:flex items-center gap-3">
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Última actualización</p>
+                  <p className="text-sm font-semibold">{new Date().toLocaleDateString('es-AR')}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Diseño Moderno */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-8">
-          <Card>
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Productos</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground"/>
+              <CardTitle className="text-sm font-semibold text-blue-900">Total Productos</CardTitle>
+              <div className="p-2 bg-blue-600 rounded-xl shadow-md">
+                <Package className="h-5 w-5 text-white"/>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.totalProducts}</div>
-              <p className="text-xs text-muted-foreground">En catálogo</p>
+              <div className="text-3xl font-bold text-blue-900">{stats.totalProducts}</div>
+              <p className="text-xs text-blue-700 font-medium mt-1">En catálogo</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Stock Bajo</CardTitle>
-              <AlertCircle className="h-4 w-4 text-orange-500"/>
+              <CardTitle className="text-sm font-semibold text-orange-900">Stock Bajo</CardTitle>
+              <div className="p-2 bg-orange-600 rounded-xl shadow-md">
+                <AlertCircle className="h-5 w-5 text-white"/>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.lowStockProducts}</div>
-              <p className="text-xs text-muted-foreground">Menos de 10 unidades</p>
+              <div className="text-3xl font-bold text-orange-900">{stats.lowStockProducts}</div>
+              <p className="text-xs text-orange-700 font-medium mt-1">Menos de 10 unidades</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pedidos Pendientes</CardTitle>
-              <ShoppingCart className="h-4 w-4 text-muted-foreground"/>
+              <CardTitle className="text-sm font-semibold text-purple-900">Pedidos Pendientes</CardTitle>
+              <div className="p-2 bg-purple-600 rounded-xl shadow-md">
+                <ShoppingCart className="h-5 w-5 text-white"/>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.pendingOrders}</div>
-              <p className="text-xs text-muted-foreground">Requieren atención</p>
+              <div className="text-3xl font-bold text-purple-900">{stats.pendingOrders}</div>
+              <p className="text-xs text-purple-700 font-medium mt-1">Requieren atención</p>
             </CardContent>
           </Card>
           
-          {/* 🔴 NUEVA: Tarjeta de Pedidos RX */}
-          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-300">
+          {/* Tarjeta de Pedidos RX */}
+          <Card className="bg-gradient-to-br from-red-50 to-red-100 border-red-300 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-red-900">Pedidos RX</CardTitle>
-              <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-                <Pill className="h-4 w-4 text-white"/>
+              <CardTitle className="text-sm font-semibold text-red-900">Pedidos RX</CardTitle>
+              <div className="p-2 bg-red-600 rounded-xl shadow-md">
+                <Pill className="h-5 w-5 text-white"/>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-900">
+              <div className="text-3xl font-bold text-red-900">
                 {orders.filter(o => o.deliveryMethod === 'PICKUP' && o.status !== 'COMPLETED' && o.status !== 'CANCELLED').length}
               </div>
-              <p className="text-xs text-red-700 font-medium">Para retiro en farmacia</p>
+              <p className="text-xs text-red-700 font-medium mt-1">Para retiro en farmacia</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-lg transition-all duration-300 hover:scale-105">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
-              <TrendingUp className="h-4 w-4 text-green-500"/>
+              <CardTitle className="text-sm font-semibold text-green-900">Ingresos Totales</CardTitle>
+              <div className="p-2 bg-green-600 rounded-xl shadow-md">
+                <TrendingUp className="h-5 w-5 text-white"/>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{formatPrice(stats.totalRevenue)}</div>
-              <p className="text-xs text-muted-foreground">Ventas totales</p>
+              <div className="text-3xl font-bold text-green-900">{formatPrice(stats.totalRevenue)}</div>
+              <p className="text-xs text-green-700 font-medium mt-1">Ventas totales</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Diseño Mejorado */}
         <Tabs defaultValue="products" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="products">Productos</TabsTrigger>
-            <TabsTrigger value="categories">Categorías</TabsTrigger>
-            <TabsTrigger value="orders">Pedidos</TabsTrigger>
-            <TabsTrigger value="stock">Stock Bajo</TabsTrigger>
+          <TabsList className="bg-gradient-to-r from-primary/10 to-primary/5 border-2 border-primary/20 p-1">
+            <TabsTrigger value="products" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <Package className="mr-2 h-4 w-4"/>
+              Productos
+            </TabsTrigger>
+            <TabsTrigger value="categories" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <TrendingUp className="mr-2 h-4 w-4"/>
+              Categorías
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <ShoppingCart className="mr-2 h-4 w-4"/>
+              Pedidos
+            </TabsTrigger>
+            <TabsTrigger value="stock" className="data-[state=active]:bg-white data-[state=active]:shadow-md">
+              <AlertCircle className="mr-2 h-4 w-4"/>
+              Stock Bajo
+            </TabsTrigger>
           </TabsList>
 
           {/* Products Tab */}
           <TabsContent value="products">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-blue-50 to-blue-100 border-b-2 border-blue-200">
                 <div>
-                  <CardTitle>Gestión de Productos</CardTitle>
-                  <CardDescription>Administra el inventario de la farmacia</CardDescription>
+                  <CardTitle className="text-2xl font-bold text-blue-900 flex items-center gap-2">
+                    <Package className="h-6 w-6" />
+                    Gestión de Productos
+                  </CardTitle>
+                  <CardDescription className="text-blue-700 font-medium">
+                    Administra el inventario de la farmacia
+                  </CardDescription>
                 </div>
-                <Button onClick={handleOpenCreateProductModal}>
+                <Button 
+                  onClick={handleOpenCreateProductModal}
+                  className="bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-700 shadow-md hover:shadow-lg transition-all"
+                >
                   <Plus className="mr-2 h-4 w-4"/>
                   Nuevo Producto
                 </Button>
@@ -467,10 +457,20 @@ const PharmacistDashboard = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleOpenEditProductModal(product)}>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleOpenEditProductModal(product)}
+                              className="hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                            >
                               <Edit className="h-4 w-4"/>
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteProduct(product.id)}>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="hover:bg-red-100 hover:text-red-600 transition-colors"
+                            >
                               <Trash2 className="h-4 w-4"/>
                             </Button>
                           </div>
@@ -484,13 +484,21 @@ const PharmacistDashboard = () => {
 
           {/* Categories Tab */}
           <TabsContent value="categories">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="flex flex-row items-center justify-between bg-gradient-to-r from-purple-50 to-purple-100 border-b-2 border-purple-200">
                 <div>
-                  <CardTitle>Gestión de Categorías</CardTitle>
-                  <CardDescription>Organiza los productos por categorías</CardDescription>
+                  <CardTitle className="text-2xl font-bold text-purple-900 flex items-center gap-2">
+                    <TrendingUp className="h-6 w-6" />
+                    Gestión de Categorías
+                  </CardTitle>
+                  <CardDescription className="text-purple-700 font-medium">
+                    Organiza los productos por categorías
+                  </CardDescription>
                 </div>
-                <Button onClick={handleOpenCreateCategoryModal}>
+                <Button 
+                  onClick={handleOpenCreateCategoryModal}
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-md hover:shadow-lg transition-all"
+                >
                   <Plus className="mr-2 h-4 w-4"/>
                   Nueva Categoría
                 </Button>
@@ -510,10 +518,20 @@ const PharmacistDashboard = () => {
                         <TableCell>{category.description || '-'}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleOpenEditCategoryModal(category)}>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleOpenEditCategoryModal(category)}
+                              className="hover:bg-purple-100 hover:text-purple-600 transition-colors"
+                            >
                               <Edit className="h-4 w-4"/>
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteCategory(category.id)}>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => handleDeleteCategory(category.id)}
+                              className="hover:bg-red-100 hover:text-red-600 transition-colors"
+                            >
                               <Trash2 className="h-4 w-4"/>
                             </Button>
                           </div>
@@ -527,10 +545,15 @@ const PharmacistDashboard = () => {
 
           {/* Orders Tab */}
           <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestión de Pedidos</CardTitle>
-                <CardDescription>Administra los pedidos de clientes</CardDescription>
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-green-50 to-green-100 border-b-2 border-green-200">
+                <CardTitle className="text-2xl font-bold text-green-900 flex items-center gap-2">
+                  <ShoppingCart className="h-6 w-6" />
+                  Gestión de Pedidos
+                </CardTitle>
+                <CardDescription className="text-green-700 font-medium">
+                  Administra los pedidos de clientes
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -565,31 +588,68 @@ const PharmacistDashboard = () => {
                         <TableCell>{getStatusBadge(order.status)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            {/* Botón PICKUP para órdenes con método PICKUP */}
-                            {order.deliveryMethod === 'PICKUP' && order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
-                              <Button 
-                                variant={order.requiresPrescription ? 'default' : 'outline'}
-                                className={order.requiresPrescription ? 'bg-red-600 hover:bg-red-700' : ''}
-                                size="sm" 
-                                onClick={() => handleMarkPickupComplete(order.id)}
-                              >
-                                <CheckCircle className="mr-1 h-3 w-3"/>
-                                {order.requiresPrescription ? '⚕️ Entregar RX' : 'Entregar'}
-                              </Button>
-                            )}
+                            {/* Botones según estado del pedido */}
                             
-                            {/* Botones de flujo normal para otros métodos */}
-                            {order.deliveryMethod !== 'PICKUP' && order.status === 'PENDING' && (
-                              <Button variant="outline" size="sm" onClick={() => handleUpdateOrderStatus(order.id, 'PROCESSING')}>
-                                <CheckCircle className="mr-1 h-3 w-3"/>
+                            {/* PENDING o CONFIRMED: Mostrar botón para procesar */}
+                            {(order.status === 'PENDING' || order.status === 'CONFIRMED') && (
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleUpdateOrderStatus(order.id, 'PROCESSING')}
+                                className="bg-blue-50 hover:bg-blue-100 border-blue-200 hover:text-blue-800"
+                              >
+                                <Package className="mr-1 h-3 w-3"/>
                                 Procesar
                               </Button>
                             )}
-                            {order.deliveryMethod !== 'PICKUP' && order.status === 'PROCESSING' && (
-                              <Button variant="outline" size="sm" onClick={() => handleUpdateOrderStatus(order.id, 'COMPLETED')}>
-                                <CheckCircle className="mr-1 h-3 w-3"/>
-                                Completar
-                              </Button>
+                            
+                            {/* PROCESSING: Mostrar botones según método de entrega */}
+                            {order.status === 'PROCESSING' && (
+                              <>
+                                {order.deliveryMethod === 'PICKUP' ? (
+                                  <Button 
+                                    variant={order.requiresPrescription ? 'default' : 'outline'}
+                                    className={order.requiresPrescription ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-green-50 hover:bg-green-100 border-green-200'}
+                                    size="sm" 
+                                    onClick={() => handleMarkPickupComplete(order.id)}
+                                  >
+                                    <CheckCircle className="mr-1 h-3 w-3"/>
+                                    {order.requiresPrescription ? '⚕️ Entregar RX' : '✓ Entregar'}
+                                  </Button>
+                                ) : order.deliveryMethod === 'DELIVERY' ? (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleUpdateOrderStatus(order.id, 'COMPLETED')}
+                                    className="bg-green-50 hover:bg-green-100 border-green-200"
+                                  >
+                                    <CheckCircle className="mr-1 h-3 w-3"/>
+                                    Marcar Enviado
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    onClick={() => handleUpdateOrderStatus(order.id, 'COMPLETED')}
+                                    className="bg-green-50 hover:bg-green-100 border-green-200  hover:text-green-800"
+                                  >
+                                    <CheckCircle className="mr-1 h-3 w-3"/>
+                                    Completar
+                                  </Button>
+                                )}
+                              </>
+                            )}
+
+                            {order.status === 'COMPLETED' && (
+                              <Badge variant="secondary" className="bg-green-100 hover:text-green-800">
+                                ✓ Completado
+                              </Badge>
+                            )}
+
+                            {order.status === 'CANCELLED' && (
+                              <Badge variant="destructive">
+                                ✗ Cancelado
+                              </Badge>
                             )}
                           </div>
                         </TableCell>
@@ -602,10 +662,15 @@ const PharmacistDashboard = () => {
 
           {/* Low Stock Tab */}
           <TabsContent value="stock">
-            <Card>
-              <CardHeader>
-                <CardTitle>Productos con Stock Bajo</CardTitle>
-                <CardDescription>Productos que requieren reabastecimiento (menos de 10 unidades)</CardDescription>
+            <Card className="border-2 shadow-lg">
+              <CardHeader className="bg-gradient-to-r from-orange-50 to-orange-100 border-b-2 border-orange-200">
+                <CardTitle className="text-2xl font-bold text-orange-900 flex items-center gap-2">
+                  <AlertCircle className="h-6 w-6" />
+                  Productos con Stock Bajo
+                </CardTitle>
+                <CardDescription className="text-orange-700 font-medium">
+                  Productos que requieren reabastecimiento (menos de 10 unidades)
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -631,8 +696,14 @@ const PharmacistDashboard = () => {
                           </TableCell>
                           <TableCell>{formatPrice(product.price)}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="outline" size="sm">
-                              Reabastecer
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handleOpenEditProductModal(product)}
+                              className="bg-orange-50 hover:bg-orange-100 border-orange-200 text-orange-700 hover:text-orange-800 font-semibold"
+                            >
+                              <Package className="mr-1 h-3 w-3"/>
+                              Editar Stock
                             </Button>
                           </TableCell>
                         </TableRow>))}

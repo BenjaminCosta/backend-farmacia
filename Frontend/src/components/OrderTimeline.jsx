@@ -2,12 +2,12 @@ import { Package, Truck, CheckCircle, Clock, XCircle, Home } from 'lucide-react'
 import { cn } from '@/lib/utils';
 
 const OrderTimeline = ({ status, deliveryMethod }) => {
-  // Mapeo de estados
+  // Mapeo de estados - Ajustado para el flujo real
   const statusMap = {
-    'PENDING': 0,
-    'CONFIRMED': 1,
-    'PROCESSING': 2,
-    'COMPLETED': 3,
+    'PENDING': 0,      // Pago exitoso - Pedido confirmado
+    'CONFIRMED': 0,    // Pago exitoso - Pedido confirmado
+    'PROCESSING': 1,   // Farmacia procesando (Preparando/Listo para retirar)
+    'COMPLETED': 2,    // Entregado o Retirado
     'CANCELLED': -1
   };
 
@@ -15,53 +15,47 @@ const OrderTimeline = ({ status, deliveryMethod }) => {
   const isCancelled = status === 'CANCELLED';
   const isPickup = deliveryMethod === 'PICKUP';
 
-  // Pasos para envío a domicilio
+  // Pasos para envío a domicilio (3 pasos)
   const deliverySteps = [
     { 
-      label: 'Pedido Recibido', 
-      icon: Package, 
-      color: 'blue',
-      description: 'Tu pedido fue confirmado'
+      label: 'Pago Confirmado', 
+      icon: CheckCircle, 
+      color: 'green',
+      description: 'Tu pago fue procesado exitosamente'
     },
     { 
       label: 'En Preparación', 
-      icon: Clock, 
+      icon: Package, 
       color: 'orange',
       description: 'Estamos preparando tu pedido'
     },
     { 
-      label: 'En Camino', 
-      icon: Truck, 
-      color: 'purple',
-      description: 'Tu pedido está en ruta'
-    },
-    { 
       label: 'Entregado', 
-      icon: CheckCircle, 
-      color: 'green',
-      description: 'Pedido completado'
+      icon: Truck, 
+      color: 'blue',
+      description: 'Pedido entregado con éxito'
     }
   ];
 
-  // Pasos para retiro en farmacia
+  // Pasos para retiro en farmacia (3 pasos)
   const pickupSteps = [
     { 
-      label: 'Pedido Recibido', 
-      icon: Package, 
-      color: 'blue',
-      description: 'Tu pedido fue confirmado'
+      label: 'Pago Confirmado', 
+      icon: CheckCircle, 
+      color: 'green',
+      description: 'Tu pago fue procesado exitosamente'
     },
     { 
       label: 'Listo para Retirar', 
       icon: Home, 
       color: 'orange',
-      description: 'Ya podés pasar a retirarlo'
+      description: 'Ya podés pasar a retirarlo en la farmacia'
     },
     { 
       label: 'Retirado', 
-      icon: CheckCircle, 
-      color: 'green',
-      description: 'Pedido completado'
+      icon: Package, 
+      color: 'blue',
+      description: 'Pedido retirado con éxito'
     }
   ];
 

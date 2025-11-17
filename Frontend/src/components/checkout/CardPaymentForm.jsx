@@ -23,12 +23,7 @@ const CardPaymentForm = ({ clientSecret, amount, currency, onSuccess, onError, f
         console.log('🔄 Iniciando confirmación de pago...');
 
         try {
-            // Guardar datos del formulario en localStorage por si hay redirección
-            console.log('💾 Guardando datos del formulario:', formData);
-            localStorage.setItem('checkoutFormData', JSON.stringify(formData));
-            localStorage.setItem('pendingPaymentIntentId', clientSecret.split('_secret_')[0]);
-
-            console.log('💳 Llamando a stripe.confirmPayment con:', {
+            console.log(' Llamando a stripe.confirmPayment con:', {
                 elements,
                 redirect: 'if_required',
                 confirmParams: {}
@@ -50,9 +45,6 @@ const CardPaymentForm = ({ clientSecret, amount, currency, onSuccess, onError, f
                 
                 if (paymentIntent.status === 'succeeded') {
                     console.log('🎉 Pago exitoso! ID:', paymentIntent.id);
-                    // Limpiar localStorage ya que el pago fue exitoso
-                    localStorage.removeItem('checkoutFormData');
-                    localStorage.removeItem('pendingPaymentIntentId');
                     onSuccess(paymentIntent.id);
                 } else if (paymentIntent.status === 'requires_action') {
                     console.log('⚠️ Se requiere acción adicional (3D Secure, etc.)');

@@ -4,38 +4,22 @@ import { ShoppingCart, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { formatPrice } from '@/lib/formatPrice';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { addItem } from '@/store/cart/cartSlice';
-import { useWishlist } from '@/context/WishlistContext';
+import { addToWishlist, removeFromWishlist, selectIsInWishlist } from '@/store/wishlist/wishlistSlice';
+import { useGetProductImagesQuery } from '@/services/products';
 import { cn } from '@/lib/utils';
-import client from '@/api/client';
 
 const ProductCard = ({ id, name, price, image, description, requiresPrescription }) => {
     const dispatch = useAppDispatch();
-    const { addItem: addToWishlist, isInWishlist, removeItem: removeFromWishlist } = useWishlist();
-    const [primaryImage, setPrimaryImage] = useState(null);
-    const [imageLoading, setImageLoading] = useState(true);
+    const isInWishlist = useAppSelector(selectIsInWishlist(id));
+    
+    const { data: images = [], isLoading: imageLoading } = useGetProductImagesQuery(id);
+    const primaryImage = images.find(img => img.isPrimary) || images[0];
+    
     const [isFlying, setIsFlying] = useState(false);
     const [heartBounce, setHeartBounce] = useState(false);
     const [cartBounce, setCartBounce] = useState(false);
-
-    useEffect(() => {
-        const fetchPrimaryImage = async () => {
-            try {
-                setImageLoading(true);
-                const response = await client.get(`/api/v1/products/${id}/images`);
-                const images = response.data;
-                const primary = images.find(img => img.isPrimary) || images[0];
-                setPrimaryImage(primary);
-            } catch (error) {
-                console.error('Error cargando imagen:', error);
-            } finally {
-                setImageLoading(false);
-            }
-        };
-
-        fetchPrimaryImage();
-    }, [id]);
 
     const getImageUrl = (imageId, width = null) => {
         const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4002';
@@ -66,11 +50,11 @@ const ProductCard = ({ id, name, price, image, description, requiresPrescription
         setHeartBounce(true);
         setTimeout(() => setHeartBounce(false), 500);
         
-        if (isInWishlist(id)) {
-            removeFromWishlist(id);
+        if (isInWishlist) {
+            dispatch(removeFromWishlist(id));
         }
         else {
-            addToWishlist({ id, name, price, image });
+            dispatch(addToWishlist(id));
         }
     };
     return (<>
@@ -150,12 +134,12 @@ const ProductCard = ({ id, name, price, image, description, requiresPrescription
             )}
             
             {/* Wishlist button */}
-            <Button variant="ghost" size="icon" className={cn("absolute top-3 right-3 backdrop-blur-md transition-all duration-300 shadow-lg hover:scale-110", isInWishlist(id)
+            <Button variant="ghost" size="icon" className={cn("absolute top-3 right-3 backdrop-blur-md transition-all duration-300 shadow-lg hover:scale-110", isInWishlist
                 ? 'bg-primary/90 hover:bg-primary text-primary-foreground'
                 : 'bg-background/90 hover:bg-background/100')} onClick={handleToggleWishlist}>
               <Heart className={cn('h-5 w-5 transition-transform duration-300', 
                 heartBounce && 'animate-bounce',
-                isInWishlist(id)
+                isInWishlist
                 ? 'fill-current scale-110'
                 : 'group-hover:scale-110')}/>
             </Button>

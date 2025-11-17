@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,66 +5,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import client from '@/api/client';
-import { toast } from 'sonner';
-import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
+import { useGetProductsQuery } from '@/services/products';
+import { useGetCategoriesQuery } from '@/services/categories';
+
 const AdminDashboard = () => {
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        fetchData();
-    }, []);
-    const fetchData = async () => {
-        setLoading(true);
-        try {
-            const [productsRes, categoriesRes] = await Promise.all([
-                client.get('/api/v1/products'),
-                client.get('/api/v1/categories'),
-            ]);
-            setProducts(normalizeProducts(productsRes.data));
-            setCategories(normalizeCategories(categoriesRes.data));
-        }
-        catch (error) {
-            console.error('Error fetching data:', error);
-            // Mock data
-            setProducts([
-                { id: '1', name: 'Ibuprofeno 400mg', price: 250000, stock: 50 },
-                { id: '2', name: 'Vitamina C 1000mg', price: 180000, stock: 30 },
-            ]);
-            setCategories([
-                { id: '1', name: 'Medicamentos', description: 'Productos farmacéuticos' },
-                { id: '2', name: 'Bienestar', description: 'Vitaminas y suplementos' },
-            ]);
-        }
-        finally {
-            setLoading(false);
-        }
-    };
-    const handleDeleteProduct = async (id) => {
-        if (!confirm('¿Estás seguro de eliminar este producto?'))
-            return;
-        try {
-            await client.delete(`/api/v1/products/${id}`);
-            setProducts(products.filter((p) => p.id !== id));
-            toast.success('Producto eliminado');
-        }
-        catch (error) {
-            toast.error('Error al eliminar producto');
-        }
-    };
-    const handleDeleteCategory = async (id) => {
-        if (!confirm('¿Estás seguro de eliminar esta categoría?'))
-            return;
-        try {
-            await client.delete(`/api/v1/categories/${id}`);
-            setCategories(categories.filter((c) => c.id !== id));
-            toast.success('Categoría eliminada');
-        }
-        catch (error) {
-            toast.error('Error al eliminar categoría');
-        }
-    };
+    const { data: products = [], isLoading: productsLoading } = useGetProductsQuery();
+    const { data: categories = [], isLoading: categoriesLoading } = useGetCategoriesQuery();
+    
+    const loading = productsLoading || categoriesLoading;
+    
     if (loading) {
         return <Loader />;
     }

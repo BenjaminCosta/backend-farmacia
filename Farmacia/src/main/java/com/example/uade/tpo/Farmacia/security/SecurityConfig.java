@@ -39,6 +39,7 @@ public class SecurityConfig {
                     
                     // Público: registro y login sin autenticación
                     .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/v1/auth/**").permitAll()
                     
                     // Público: errors y actuator
                     .requestMatchers("/error/**").permitAll()
@@ -46,32 +47,48 @@ public class SecurityConfig {
                     
                     // Catálogo público: cualquiera puede ver productos y categorías
                     .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/v1/products/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/v1/categories/**").permitAll()
                     
                     // Imágenes de productos: acceso público (con caching)
                     .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/products/*/images").permitAll()
+                    .requestMatchers(HttpMethod.GET, "/v1/products/*/images").permitAll()
                     
                     // Rutas de ADMIN: solo acceso con rol ADMIN
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/v1/admin/**").hasRole("ADMIN")
                     
                     // Rutas de órdenes y gestión: ADMIN tiene acceso total
                     .requestMatchers("/api/v1/orders/all").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers("/v1/orders/all").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/orders/*/status").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PUT, "/v1/orders/*/status").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.PATCH, "/api/v1/orders/*/status").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PATCH, "/v1/orders/*/status").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.POST, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.POST, "/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PUT, "/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.DELETE, "/v1/products/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.POST, "/api/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.POST, "/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.PUT, "/api/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.PUT, "/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
+                    .requestMatchers(HttpMethod.DELETE, "/v1/categories/**").hasAnyRole("ADMIN", "PHARMACIST")
                     
                     // Cart y Orders requieren autenticación (manejado por @PreAuthorize en controllers)
                     .requestMatchers("/api/v1/cart/**").authenticated()
+                    .requestMatchers("/v1/cart/**").authenticated()
                     .requestMatchers("/api/v1/orders/**").authenticated()
+                    .requestMatchers("/v1/orders/**").authenticated()
                     
                     // Payments requieren autenticación
                     .requestMatchers("/api/v1/payments/**").authenticated()
+                    .requestMatchers("/v1/payments/**").authenticated()
                     
                     // Todo lo demás requiere autenticación
                     .anyRequest().authenticated()

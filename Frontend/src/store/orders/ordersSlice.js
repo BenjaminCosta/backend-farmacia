@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import client from '../../api/client';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4002';
 
 // Estado inicial
 const initialState = {
@@ -10,63 +11,28 @@ const initialState = {
   error: null,
 };
 
-// Thunk: Fetch user orders
-export const fetchMyOrders = createAsyncThunk(
-  'orders/fetchMyOrders',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await client.get('/api/v1/orders/me');
-      return response.data; // OrderSummaryDTO[]
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al obtener órdenes'
-      );
-    }
-  }
-);
-
-// Thunk: Fetch order by ID
-export const fetchOrderById = createAsyncThunk(
-  'orders/fetchOrderById',
-  async (id, { rejectWithValue }) => {
-    try {
-      const response = await client.get(`/api/v1/orders/${id}`);
-      return response.data; // OrderSummaryDTO
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al obtener la orden'
-      );
-    }
-  }
-);
-
-// Thunk: Create order (checkout)
+// Thunk: Create order (checkout) - Único que se usa desde Checkout.jsx
 export const createOrder = createAsyncThunk(
   'orders/createOrder',
-  async (orderData, { rejectWithValue }) => {
+  async (orderData, { getState, rejectWithValue }) => {
     try {
-      const response = await client.post('/api/v1/orders', orderData);
-      return response.data; // OrderSummaryDTO completo
+      const token = getState().auth.token;
+      const response = await fetch(`${API_URL}/api/v1/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        credentials: 'include',
+        body: JSON.stringify(orderData),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        return rejectWithValue(error.message || 'Error al crear la orden');
+      }
+      return await response.json(); // OrderSummaryDTO completo
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al crear la orden'
-      );
-    }
-  }
-);
-
-// Thunk: Update order status (admin/pharmacist)
-export const updateOrderStatus = createAsyncThunk(
-  'orders/updateOrderStatus',
-  async ({ id, status }, { rejectWithValue }) => {
-    try {
-      const response = await client.put(`/api/v1/orders/${id}/status`, { status });
-      return response.data; // OrderSummaryDTO actualizado
-    } catch (error) {
-      // 400 si la transición no es válida
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al actualizar el estado de la orden'
-      );
+      return rejectWithValue('Error al crear la orden');
     }
   }
 );
@@ -84,40 +50,6 @@ const ordersSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Fetch my orders
-    builder
-      .addCase(fetchMyOrders.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchMyOrders.fulfilled, (state, action) => {
-        state.loading = false;
-        state.list = action.payload;
-        // Indexar por ID para lookup rápido
-        action.payload.forEach((order) => {
-          state.byId[order.id] = order;
-        });
-      })
-      .addCase(fetchMyOrders.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-
-    // Fetch order by ID
-    builder
-      .addCase(fetchOrderById.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchOrderById.fulfilled, (state, action) => {
-        state.loading = false;
-        state.byId[action.payload.id] = action.payload;
-      })
-      .addCase(fetchOrderById.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-
     // Create order
     builder
       .addCase(createOrder.pending, (state) => {
@@ -133,27 +65,6 @@ const ordersSlice = createSlice({
         state.lastCreatedId = order.id; // Para navegar a /orders/:id
       })
       .addCase(createOrder.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      });
-
-    // Update order status
-    builder
-      .addCase(updateOrderStatus.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(updateOrderStatus.fulfilled, (state, action) => {
-        state.loading = false;
-        const order = action.payload;
-        state.byId[order.id] = order;
-        // Actualizar en la lista también
-        const index = state.list.findIndex((o) => o.id === order.id);
-        if (index !== -1) {
-          state.list[index] = order;
-        }
-      })
-      .addCase(updateOrderStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

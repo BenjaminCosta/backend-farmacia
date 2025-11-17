@@ -3,12 +3,13 @@ import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Progress } from './ui/progress';
-import client from '../api/client';
+import { useUploadProductImagesMutation } from '../services/products';
 
-const ProductImageUploader = ({ productId, onUploadSuccess }) => {
+const ProductImageUploader = ({ productId }) => {
+  const [uploadProductImages, { isLoading: uploading }] = useUploadProductImagesMutation();
+  
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
-  const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
 
@@ -72,42 +73,25 @@ const ProductImageUploader = ({ productId, onUploadSuccess }) => {
       return;
     }
 
-    setUploading(true);
     setProgress(0);
     setError('');
 
     try {
-      const formData = new FormData();
-      selectedFiles.forEach((file) => {
-        formData.append('files', file);
-      });
-
-      await client.post(`/api/v1/products/${productId}/images`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setProgress(percentCompleted);
-        },
-      });
+      await uploadProductImages({ 
+        productId, 
+        files: selectedFiles 
+      }).unwrap();
 
       // Limpiar
       setSelectedFiles([]);
       setPreviews([]);
-      setProgress(0);
+      setProgress(100);
       
-      // Notificar éxito
-      if (onUploadSuccess) {
-        onUploadSuccess();
-      }
+      // Reset después de mostrar 100%
+      setTimeout(() => setProgress(0), 500);
     } catch (err) {
       console.error('Error subiendo imágenes:', err);
-      setError(err.response?.data?.message || 'Error subiendo imágenes');
-    } finally {
-      setUploading(false);
+      setError(err.data?.message || 'Error subiendo imágenes');
     }
   };
 

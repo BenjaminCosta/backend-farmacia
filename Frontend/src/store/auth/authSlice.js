@@ -1,31 +1,33 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import client from '../../api/client';
+import { cookieStorage } from '../../lib/cookieStorage';
 
-// Cargar token desde localStorage
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4002';
+
+// Cargar token desde cookies (NO localStorage según reglas)
 const loadTokenFromStorage = () => {
   try {
-    const token = localStorage.getItem('authToken');
+    const token = cookieStorage.getItem('authToken');
     return token || null;
   } catch (error) {
-    console.error('Error loading token from localStorage:', error);
+    console.error('Error loading token from cookies:', error);
     return null;
   }
 };
 
-// Guardar token en localStorage
+// Guardar token en cookies (NO localStorage según reglas)
 const saveTokenToStorage = (token) => {
   try {
     if (token) {
-      localStorage.setItem('authToken', token);
+      cookieStorage.setItem('authToken', token, 7); // 7 días
     } else {
-      localStorage.removeItem('authToken');
+      cookieStorage.removeItem('authToken');
     }
   } catch (error) {
-    console.error('Error saving token to localStorage:', error);
+    console.error('Error saving token to cookies:', error);
   }
 };
 
-// Estado inicial (con token desde localStorage)
+// Estado inicial (con token desde cookies)
 const initialState = {
   user: null, // { id, email, name, role }
   token: loadTokenFromStorage(),
@@ -38,12 +40,19 @@ export const login = createAsyncThunk(
   'auth/login',
   async (credentials, { rejectWithValue }) => {
     try {
-      const response = await client.post('/api/v1/auth/authenticate', credentials);
-      return response.data; // { token, user }
+      const response = await fetch(`${API_URL}/api/v1/auth/authenticate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        return rejectWithValue(error.message || 'Error al iniciar sesión');
+      }
+      return await response.json(); // { token, user }
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al iniciar sesión'
-      );
+      return rejectWithValue('Error al iniciar sesión');
     }
   }
 );
@@ -53,16 +62,19 @@ export const register = createAsyncThunk(
   'auth/register',
   async ({ email, password, name }, { rejectWithValue }) => {
     try {
-      const response = await client.post('/api/v1/auth/register', { 
-        email, 
-        password, 
-        name 
+      const response = await fetch(`${API_URL}/api/v1/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, name }),
+        credentials: 'include',
       });
-      return response.data; // { token, user }
+      if (!response.ok) {
+        const error = await response.json();
+        return rejectWithValue(error.message || 'Error al registrarse');
+      }
+      return await response.json(); // { token, user }
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al registrarse'
-      );
+      return rejectWithValue('Error al registrarse');
     }
   }
 );
@@ -70,14 +82,24 @@ export const register = createAsyncThunk(
 // Thunk: Obtener usuario actual
 export const me = createAsyncThunk(
   'auth/me',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      const response = await client.get('/api/v1/auth/me');
-      return response.data; // user
+      const token = getState().auth.token;
+      const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        return rejectWithValue(error.message || 'Error al obtener usuario');
+      }
+      return await response.json(); // user
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Error al obtener usuario'
-      );
+      return rejectWithValue('Error al obtener usuario');
     }
   }
 );

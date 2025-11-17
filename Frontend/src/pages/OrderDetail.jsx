@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -7,64 +6,39 @@ import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
 import OrderTimeline from '@/components/OrderTimeline';
-import client from '@/api/client';
+import { useGetOrderQuery } from '@/services/orders';
 
 const OrderDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [order, setOrder] = useState(null);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        if (id) {
-            fetchOrder();
-        }
-        else {
-            setLoading(false);
-            setOrder(null);
-        }
-    }, [id]);
-    const fetchOrder = async () => {
-        if (!id)
-            return;
-        try {
-            const response = await client.get(`/api/v1/orders/${id}`);
-            const orderData = response.data;
-            // Mapear la respuesta del backend al formato esperado
-            const mappedOrder = {
-                id: orderData.id,
-                createdAt: orderData.createdAt,
-                status: orderData.status,
-                total: orderData.total,
-                items: orderData.items?.map((item) => ({
-                    id: item.productId,
-                    productId: item.productId,
-                    productName: item.productName,
-                    quantity: item.quantity,
-                    price: item.unitPrice,
-                })) || [],
-                shippingAddress: orderData.delivery ? {
-                    fullName: orderData.delivery.fullName,
-                    address: orderData.delivery.street,
-                    city: orderData.delivery.city,
-                    zipCode: orderData.delivery.zip,
-                    phone: orderData.delivery.phone,
-                } : undefined,
-                deliveryMethod: orderData.delivery?.method || 'delivery',
-                paymentMethod: orderData.paymentMethod || 'cash',
-            };
-            setOrder(mappedOrder);
-        }
-        catch (error) {
-            console.error('Error fetching order:', error);
-            // Manejar 404 - orden no encontrada o no pertenece al usuario
-            if (error.response?.status === 404) {
-                setOrder(null);
-            }
-        }
-        finally {
-            setLoading(false);
-        }
-    };
+    
+    const { data: orderData, isLoading: loading, error } = useGetOrderQuery(id, {
+        skip: !id
+    });
+    
+    // Mapear la respuesta del backend al formato esperado
+    const order = orderData ? {
+        id: orderData.id,
+        createdAt: orderData.createdAt,
+        status: orderData.status,
+        total: orderData.total,
+        items: orderData.items?.map((item) => ({
+            id: item.productId,
+            productId: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            price: item.unitPrice,
+        })) || [],
+        shippingAddress: orderData.delivery ? {
+            fullName: orderData.delivery.fullName,
+            address: orderData.delivery.street,
+            city: orderData.delivery.city,
+            zipCode: orderData.delivery.zip,
+            phone: orderData.delivery.phone,
+        } : undefined,
+        deliveryMethod: orderData.delivery?.method || 'delivery',
+        paymentMethod: orderData.paymentMethod || 'cash',
+    } : null;
     const getStatusColor = (status) => {
         switch (status) {
             case 'PENDING':

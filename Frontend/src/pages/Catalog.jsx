@@ -9,71 +9,43 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ProductCard from '@/components/ProductCard';
 import Loader from '@/components/Loader';
-import client from '@/api/client';
-import { normalizeProducts, normalizeCategories } from '@/lib/adapters';
+import { useGetProductsQuery } from '@/services/products';
+import { useGetCategoriesQuery } from '@/services/categories';
 
 const Catalog = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-    const [rxFilter, setRxFilter] = useState(searchParams.get('rx') || 'all'); // 🔴 Nuevo: filtro RX
+    const [rxFilter, setRxFilter] = useState(searchParams.get('rx') || 'all');
     
     const categoryId = searchParams.get('categoryId');
     const page = parseInt(searchParams.get('page') || '0');
     const size = parseInt(searchParams.get('size') || '12');
-    useEffect(() => {
-        fetchCategories();
-    }, []);
     
-    useEffect(() => {
-        fetchProducts();
-    }, [categoryId, searchQuery, page, size, rxFilter]); // 🔴 Agregar rxFilter a dependencias
-    const fetchCategories = async () => {
-        try {
-            const response = await client.get('/api/v1/categories');
-            setCategories(normalizeCategories(response.data));
-        }
-        catch (error) {
-            console.error('Error fetching categories:', error);
-        }
-    };
-    const fetchProducts = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-            const params = new URLSearchParams();
-            if (categoryId)
-                params.append('categoryId', categoryId);
-            if (searchQuery)
-                params.append('q', searchQuery);
-            // 🔴 Agregar filtro RX al backend
-            if (rxFilter === 'rx') {
-                params.append('rx', 'true');
-            } else if (rxFilter === 'otc') {
-                params.append('rx', 'false');
-            }
-            params.append('page', page.toString());
-            params.append('size', size.toString());
-            
-            const response = await client.get(`/api/v1/products?${params.toString()}`);
-            setProducts(normalizeProducts(response.data));
-        }
-        catch (error) {
-            console.error('Error fetching products:', error);
-            setError({
-                title: 'Error al cargar productos',
-                message: error.response?.data?.message || 'No se pudo conectar con el servidor. Por favor, intenta nuevamente.',
-                code: error.response?.status
-            });
-            setProducts([]);
-        }
-        finally {
-            setLoading(false);
-        }
-    };
+    // RTK Query para categorías
+    const { data: categories = [], isLoading: categoriesLoading } = useGetCategoriesQuery();
+    
+    // RTK Query para productos con filtros
+    const { 
+        data: products = [], 
+        isLoading: productsLoading, 
+        error: productsError,
+        refetch: refetchProducts
+    } = useGetProductsQuery({
+        categoryId: categoryId || undefined,
+        q: searchQuery || undefined,
+        rx: rxFilter === 'all' ? undefined : (rxFilter === 'rx'),
+        page,
+        size
+    });
+    
+    const loading = productsLoading || categoriesLoading;
+    
+    // Construir objeto de error si existe
+    const error = productsError ? {
+        title: 'Error al cargar productos',
+        message: productsError.data?.message || 'No se pudo conectar con el servidor. Por favor, intenta nuevamente.',
+        code: productsError.status
+    } : null;
     const handleSearch = (e) => {
         e.preventDefault();
         const params = new URLSearchParams(searchParams);
@@ -215,7 +187,7 @@ const Catalog = () => {
             <AlertDescription className="mt-2 space-y-3">
               <p className="text-sm">{error.message}</p>
               {error.code && (<p className="text-xs opacity-75">Código de error: {error.code}</p>)}
-              <Button variant="outline" size="sm" onClick={fetchProducts} className="mt-2 font-semibold hover:scale-105 transition-transform duration-200">
+              <Button variant="outline" size="sm" onClick={refetchProducts} className="mt-2 font-semibold hover:scale-105 transition-transform duration-200">
                 <RefreshCw className="mr-2 h-4 w-4"/>
                 Reintentar
               </Button>

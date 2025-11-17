@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Trash2, Star, Upload as UploadIcon, Image as ImageIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -12,30 +12,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from './ui/alert-dialog';
-import client from '../api/client';
+import {
+  useGetProductImagesQuery,
+  useDeleteProductImageMutation,
+  useSetProductImagePrimaryMutation,
+} from '../services/products';
 import ProductImageUploader from './ProductImageUploader';
 
 const ProductImageManager = ({ productId }) => {
-  const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { data: images = [], isLoading } = useGetProductImagesQuery(productId);
+  const [deleteProductImage] = useDeleteProductImageMutation();
+  const [setProductImagePrimary] = useSetProductImagePrimaryMutation();
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [imageToDelete, setImageToDelete] = useState(null);
-
-  const fetchImages = async () => {
-    try {
-      setLoading(true);
-      const response = await client.get(`/api/v1/products/${productId}/images`);
-      setImages(response.data);
-    } catch (error) {
-      console.error('Error cargando imágenes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchImages();
-  }, [productId]);
 
   const getImageUrl = (imageId, width = null) => {
     const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4002';
@@ -47,8 +37,7 @@ const ProductImageManager = ({ productId }) => {
 
   const handleSetPrimary = async (imageId) => {
     try {
-      await client.put(`/api/v1/products/${productId}/images/${imageId}/primary`);
-      await fetchImages(); // Recargar
+      await setProductImagePrimaryMutation({ productId, imageId }).unwrap();
     } catch (error) {
       console.error('Error marcando como principal:', error);
     }
@@ -58,8 +47,7 @@ const ProductImageManager = ({ productId }) => {
     if (!imageToDelete) return;
 
     try {
-      await client.delete(`/api/v1/products/${productId}/images/${imageToDelete}`);
-      await fetchImages(); // Recargar
+      await deleteProductImage({ productId, imageId: imageToDelete }).unwrap();
       setDeleteDialogOpen(false);
       setImageToDelete(null);
     } catch (error) {
@@ -72,7 +60,7 @@ const ProductImageManager = ({ productId }) => {
     setDeleteDialogOpen(true);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <Card>
         <CardContent className="pt-6">
@@ -87,7 +75,7 @@ const ProductImageManager = ({ productId }) => {
       {/* Uploader */}
       <div>
         <h3 className="text-lg font-semibold mb-3">Subir nuevas imágenes</h3>
-        <ProductImageUploader productId={productId} onUploadSuccess={fetchImages} />
+        <ProductImageUploader productId={productId} />
       </div>
 
       {/* Lista de imágenes */}

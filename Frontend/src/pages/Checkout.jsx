@@ -12,12 +12,12 @@ import { selectIsAuthenticated } from '@/store/auth/authSlice';
 import { createOrder, selectLastCreatedOrderId, clearLastCreatedId } from '@/store/orders/ordersSlice';
 import { formatPrice } from '@/lib/formatPrice';
 import { toast } from 'sonner';
-import client from '@/api/client';
 import stripePromise from '@/lib/stripe';
 import PaymentMethodSelector from '@/components/checkout/PaymentMethodSelector';
 import CardPaymentForm from '@/components/checkout/CardPaymentForm';
-import { createPaymentIntent, confirmOrderPayment } from '@/api/payments';
 import { Loader2 } from 'lucide-react';
+import { useGetProductsQuery } from '@/services/products';
+import { useCreatePaymentIntentMutation, useConfirmOrderPaymentMutation } from '@/services/payments';
 
 // Configuración de moneda
 const CURRENCY = 'USD'; // Usar USD para pruebas con Stripe
@@ -31,6 +31,9 @@ const Checkout = () => {
     const totalPrice = useAppSelector(selectCartTotal);
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const lastCreatedOrderId = useAppSelector(selectLastCreatedOrderId);
+    
+    const [createPaymentIntent] = useCreatePaymentIntentMutation();
+    const [confirmOrderPayment] = useConfirmOrderPaymentMutation();
     
     const [loading, setLoading] = useState(false);
     const [clientSecret, setClientSecret] = useState(null);
@@ -51,33 +54,30 @@ const Checkout = () => {
     const hasRxProduct = Object.values(productDetails).some(p => p?.requiresPrescription === true);
 
     // 🔴 Cargar detalles de productos para verificar requiresPrescription
+    // Obtener todos los productos usando RTK Query
+    const { data: allProducts = [] } = useGetProductsQuery();
+    
     useEffect(() => {
-        const fetchProductDetails = async () => {
-            try {
-                const details = {};
-                for (const item of items) {
-                    const response = await client.get(`/api/v1/products/${item.productId}`);
-                    details[item.productId] = response.data;
+        if (allProducts.length > 0 && items.length > 0) {
+            const details = {};
+            for (const item of items) {
+                const product = allProducts.find(p => p.id === item.productId);
+                if (product) {
+                    details[item.productId] = product;
                 }
-                setProductDetails(details);
-                
-                // Si hay productos RX, forzar PICKUP
-                const hasRx = Object.values(details).some(p => p?.requiresPrescription === true);
-                if (hasRx && formData.deliveryMethod === 'delivery') {
-                    setFormData(prev => ({ ...prev, deliveryMethod: 'pickup' }));
-                    toast.warning('Este pedido contiene medicamentos con receta. Solo se permite retiro en farmacia.', {
-                        duration: 5000
-                    });
-                }
-            } catch (error) {
-                console.error('Error cargando detalles de productos:', error);
             }
-        };
-        
-        if (items.length > 0) {
-            fetchProductDetails();
+            setProductDetails(details);
+            
+            // Si hay productos RX, forzar PICKUP
+            const hasRx = Object.values(details).some(p => p?.requiresPrescription === true);
+            if (hasRx && formData.deliveryMethod === 'delivery') {
+                setFormData(prev => ({ ...prev, deliveryMethod: 'pickup' }));
+                toast.warning('Este pedido contiene medicamentos con receta. Solo se permite retiro en farmacia.', {
+                    duration: 5000
+                });
+            }
         }
-    }, [items]);
+    }, [items, allProducts, formData.deliveryMethod]);
 
 
     // Calcular monto total a pagar (única fuente de verdad)
@@ -151,22 +151,22 @@ const Checkout = () => {
             if (formData.paymentMethod === 'card' && !clientSecret && items.length > 0) {
                 try {
                     // Create a temporary payment intent just with the amount
-                    const response = await client.post('/api/v1/payments/create-intent-temp', {
+                    const response = await createPaymentIntent({
                         amount: payableAmount,
                         currency: CURRENCY.toLowerCase(),
-                    });
-                    setClientSecret(response.data.clientSecret);
+                    }).unwrap();
+                    setClientSecret(response.clientSecret);
                     toast.success('Formulario de pago listo');
                 } catch (error) {
                     console.error('Error creating payment intent:', error);
-                    const message = error.response?.data?.message || 'Error al inicializar el pago';
+                    const message = error.data?.message || 'Error al inicializar el pago';
                     toast.error(message);
                 }
             }
         };
 
         initPaymentIntent();
-    }, [formData.paymentMethod, payableAmount, items.length, clientSecret]);
+    }, [formData.paymentMethod, payableAmount, items.length, clientSecret, createPaymentIntent]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -217,8 +217,8 @@ const Checkout = () => {
             
             toast.success('¡Pedido realizado con éxito!');
             
-            // Navegar a /orders/:id usando el ID devuelto
-            navigate(`/orders/${result.id}`);
+            // Navegar a payment-success con el orderId (tanto para efectivo como tarjeta)
+            navigate(`/payment-success?orderId=${result.id}`);
         } catch (error) {
             console.error('Error creating order:', error);
             toast.error(error || 'Error al procesar el pedido');
@@ -231,23 +231,19 @@ const Checkout = () => {
         console.log('✅ handlePaymentSuccess llamado con paymentId:', paymentId);
         
         try {
-            // Recuperar datos del formulario guardados (por si hubo redirección)
-            const savedFormData = JSON.parse(localStorage.getItem('checkoutFormData') || '{}');
-            const orderData = Object.keys(savedFormData).length > 0 ? savedFormData : formData;
-            
-            console.log('📦 Creando orden con datos:', orderData);
+            console.log('📦 Creando orden con datos:', formData);
 
             // 1. Crear la orden usando Redux
             const orderPayload = {
-                fullName: orderData.fullName,
-                email: orderData.email,
-                phone: orderData.phone,
+                fullName: formData.fullName,
+                email: formData.email,
+                phone: formData.phone,
                 deliveryMethod: formData.deliveryMethod.toUpperCase(),
                 paymentMethod: 'CARD',
                 address: {
-                    street: orderData.address,
-                    city: orderData.city,
-                    zip: orderData.zipCode
+                    street: formData.address,
+                    city: formData.city,
+                    zip: formData.zipCode
                 },
                 items: items.map(item => ({
                     productId: item.productId,
@@ -261,13 +257,10 @@ const Checkout = () => {
 
             // 2. Confirmar el pago asociado a la orden
             console.log(`💳 Confirmando pago para orden ${createdOrder.id}`);
-            await client.post(`/api/v1/payments/orders/${createdOrder.id}/pay`, {
+            await confirmOrderPayment({
+                orderId: createdOrder.id,
                 paymentIntentId: paymentId
-            });
-
-            // Limpiar datos guardados
-            localStorage.removeItem('checkoutFormData');
-            localStorage.removeItem('pendingPaymentIntentId');
+            }).unwrap();
 
             // Limpiar carrito Redux
             dispatch(clearCart());

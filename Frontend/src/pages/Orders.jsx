@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,37 +5,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import client from '@/api/client';
+import { useGetMyOrdersQuery } from '@/services/orders';
 
 const Orders = () => {
     const navigate = useNavigate();
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        fetchOrders();
-    }, []);
-    const fetchOrders = async () => {
-        try {
-            const response = await client.get('/api/v1/orders');
-            const ordersData = response.data || [];
-            // Mapear la respuesta del backend al formato esperado por el frontend
-            const mappedOrders = ordersData.map((order) => ({
-                id: order.id,
-                createdAt: order.createdAt,
-                status: order.status,
-                total: order.total,
-                itemCount: order.items?.length || 0,
-            }));
-            setOrders(mappedOrders);
-        }
-        catch (error) {
-            console.error('Error fetching orders:', error);
-            setOrders([]);
-        }
-        finally {
-            setLoading(false);
-        }
-    };
+    const { data: ordersData = [], isLoading: loading } = useGetMyOrdersQuery();
+    
+    // Mapear la respuesta del backend al formato esperado por el frontend
+    const orders = ordersData.map((order) => ({
+        id: order.id,
+        createdAt: order.createdAt,
+        status: order.status,
+        total: order.total,
+        itemCount: order.items?.length || 0,
+    }));
     const getStatusColor = (status) => {
         switch (status) {
             case 'PENDING':

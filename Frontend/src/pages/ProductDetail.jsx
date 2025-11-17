@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Minus, Plus, ShoppingCart, ArrowLeft, AlertCircle, Pill, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,56 +9,20 @@ import { useAppDispatch } from '@/store/hooks';
 import { addItem } from '@/store/cart/cartSlice';
 import { formatPrice } from '@/lib/formatPrice';
 import Loader from '@/components/Loader';
-import client from '@/api/client';
+import { useGetProductQuery, useGetProductImagesQuery } from '@/services/products';
 import ProductImageGallery from '@/components/ProductImageGallery';
 
 const ProductDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const [product, setProduct] = useState(null);
-    const [images, setImages] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [loadingImages, setLoadingImages] = useState(true);
     const [quantity, setQuantity] = useState(1);
     
-    useEffect(() => {
-        fetchProduct();
-        fetchImages();
-    }, [id]);
+    // RTK Query para producto e imágenes
+    const { data: product, isLoading: loadingProduct } = useGetProductQuery(id);
+    const { data: images = [], isLoading: loadingImages } = useGetProductImagesQuery(id);
     
-    const fetchProduct = async () => {
-        try {
-            const response = await client.get(`/api/v1/products/${id}`);
-            setProduct(response.data);
-        }
-        catch (error) {
-            console.error('Error fetching product:', error);
-            // Mock data for development
-            setProduct({
-                id: id || '1',
-                name: 'Ibuprofeno 400mg',
-                price: 250000,
-                description: 'Analgésico y antiinflamatorio de acción rápida. Alivia el dolor y reduce la fiebre.',
-                stock: 50,
-            });
-        }
-        finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchImages = async () => {
-        try {
-            setLoadingImages(true);
-            const response = await client.get(`/api/v1/products/${id}/images`);
-            setImages(response.data);
-        } catch (error) {
-            console.error('Error cargando imágenes:', error);
-        } finally {
-            setLoadingImages(false);
-        }
-    };
+    const loading = loadingProduct;
     const handleAddToCart = () => {
         if (product) {
             dispatch(addItem({

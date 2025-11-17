@@ -3,7 +3,7 @@ import { ShoppingCart, User, LogOut, LayoutDashboard, Package, Heart } from 'luc
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { selectUser, selectIsAuthenticated, logout } from '@/store/auth/authSlice';
 import { selectCartItemsCount } from '@/store/cart/cartSlice';
-import { useWishlist } from '@/context/WishlistContext';
+import { selectWishlistItems } from '@/store/wishlist/wishlistSlice';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +15,7 @@ const Navbar = () => {
     const isAuthenticated = useAppSelector(selectIsAuthenticated);
     const user = useAppSelector(selectUser);
     const totalItems = useAppSelector(selectCartItemsCount);
-    const { items: wishlistItems } = useWishlist();
+    const wishlistItems = useAppSelector(selectWishlistItems);
     
     const isAdmin = user?.role === 'ADMIN';
     const isPharmacist = user?.role === 'PHARMACIST';

@@ -2,15 +2,20 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useWishlist } from '@/context/WishlistContext';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { removeFromWishlist, selectWishlistItems } from '@/store/wishlist/wishlistSlice';
 import { addItem } from '@/store/cart/cartSlice';
+import { useGetProductsQuery } from '@/services/products';
 import { formatPrice } from '@/lib/formatPrice';
 
 const Wishlist = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { items, removeItem } = useWishlist();
+    const wishlistItemIds = useAppSelector(selectWishlistItems);
+    
+    // Obtener todos los productos y filtrar por los que están en wishlist
+    const { data: allProducts = [], isLoading } = useGetProductsQuery();
+    const items = allProducts.filter(product => wishlistItemIds.includes(product.id));
     
     const handleAddToCart = (item) => {
         dispatch(addItem({ 
@@ -20,6 +25,21 @@ const Wishlist = () => {
             quantity: 1 
         }));
     };
+    
+    const handleRemove = (id) => {
+        dispatch(removeFromWishlist(id));
+    };
+    
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-muted-foreground">Cargando favoritos...</p>
+                </div>
+            </div>
+        );
+    }
+    
     if (items.length === 0) {
         return (<div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -58,7 +78,7 @@ const Wishlist = () => {
                     <ShoppingCart className="mr-2 h-4 w-4"/>
                     Agregar
                   </Button>
-                  <Button onClick={() => removeItem(item.id)} variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
+                  <Button onClick={() => handleRemove(item.id)} variant="outline" size="sm" className="text-destructive hover:bg-destructive hover:text-destructive-foreground">
                     <Trash2 className="h-4 w-4"/>
                   </Button>
                 </div>
