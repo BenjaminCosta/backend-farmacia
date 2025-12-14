@@ -5,6 +5,9 @@ import cartReducer from './cart/cartSlice';
 import ordersReducer from './orders/ordersSlice';
 import toastReducer from './toast/toastSlice';
 import wishlistReducer from './wishlist/wishlistSlice';
+import productsReducer from './products/productsSlice';
+import categoriesReducer from './categories/categoriesSlice';
+import paymentsReducer from './payments/paymentsSlice';
 
 // Configurar store con middleware RTK Query + defaults
 const store = configureStore({
@@ -14,6 +17,9 @@ const store = configureStore({
     orders: ordersReducer,
     toast: toastReducer,
     wishlist: wishlistReducer,
+    products: productsReducer,
+    categories: categoriesReducer,
+    payments: paymentsReducer,
     [api.reducerPath]: api.reducer,
   },
   middleware: (getDefaultMiddleware) =>
